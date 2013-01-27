@@ -1,0 +1,70 @@
+
+struct VertexDataInput {
+	float4 vertex : POSITION;
+	float3 normal : NORMAL;
+	float3 color : COLOR;
+	float2 texCoord : TEXCOORD0;
+};
+
+struct VertexDataOutput {
+	float4 projv  : POSITION;
+	float4 color : COLOR;
+	float3 vertex : TEXCOORD0;
+	float3 normal : TEXCOORD1;
+	float4 refProjV : TEXCOORD2;
+	float4 projvtwo : TEXCOORD3;
+	float4 wpos : WPOS;
+};
+
+struct PixelDataOutput {
+	float4 color : COLOR0;
+};
+
+VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj, uniform float4x4 refModelViewProj) {
+	VertexDataOutput ret;
+	ret.projv = mul(modelViewProj, vdi.vertex);
+	ret.refProjV = mul(refModelViewProj, vdi.vertex);
+	ret.color = float4(vdi.color, 1.0f);
+	ret.vertex = vdi.vertex;
+	ret.normal = vdi.normal;
+	ret.projvtwo = mul(modelViewProj, vdi.vertex);
+	return ret;
+}
+
+TRIANGLE void GeometryMain(AttribArray<VertexDataOutput> tverts, uniform float4x4 modelViewProj, uniform float sf){
+	emitVertex(tverts[0]);
+	emitVertex(tverts[1]);
+	emitVertex(tverts[2]);
+
+	return;
+}
+
+PixelDataOutput FragmentMain(VertexDataOutput pdi, uniform sampler2D depthMap) {
+
+	PixelDataOutput ret;
+
+	ret.color = pdi.color;
+
+	//return ret;
+	float2 normalizedLoc = float2(((pdi.projvtwo.x)/(pdi.projvtwo.w)+1.0f)/2.0f, ((pdi.projvtwo.y)/(pdi.projvtwo.w)+1.0f)/2.0f);
+	float2 normalizedRefLoc = float2(((pdi.refProjV.x)/(pdi.refProjV.w)+1.0f)/2.0f, ((pdi.refProjV.y)/(pdi.refProjV.w)+1.0f)/2.0f);
+	//ret.color = tex2D(depthMap, normalizedLoc);
+	
+	if(normalizedRefLoc.x < 0.0f || normalizedRefLoc.x > 1.0f || normalizedRefLoc.y < 0.0f || normalizedRefLoc.y > 1.0f){
+		ret.color = pdi.color;
+	}else{
+		float4 depthLookUp = tex2D(depthMap, normalizedRefLoc);
+
+		float temp = 0.5f * (pdi.refProjV.z/pdi.refProjV.w) + 0.5;
+
+		if(temp > depthLookUp.x + 0.0005f){
+			ret.color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		}else{
+			ret.color = pdi.color;
+		}
+	}
+
+	return ret;
+}
+
+
