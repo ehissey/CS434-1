@@ -622,13 +622,13 @@ void Scene::RenderGPU(){
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		if(i->enableShader){
 			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
+			glEnable(GL_CULL_FACE);
 			cgi->EnableProfiles();
 			i->RenderHW();
 			cgi->DisableProfiles();
 		}else{
 			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
+			glEnable(GL_CULL_FACE);
 			i->RenderHW();
 		}
 	}
