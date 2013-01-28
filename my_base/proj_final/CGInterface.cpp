@@ -88,6 +88,10 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 		geometrySF = cgGetNamedParameter(geometryProgram, "sf");
 	#endif
 
+	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
+	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap" );
+	pixelBackground = cgGetNamedParameter(pixelProgram, "background");
+
 	return true;
 }
 
@@ -97,6 +101,11 @@ void ShaderOneInterface::PerFrameInit(){
 	#ifdef GEOMETRY_SUPPORT
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
+	
+	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
+	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
+    cgGLEnableTextureParameter(pixelCubeMap);
+	cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
 
 	#ifdef GEOMETRY_SUPPORT
 		cgGLSetParameter1f(geometrySF, scene->sf);

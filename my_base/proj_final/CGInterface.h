@@ -27,6 +27,9 @@ class ShaderOneInterface{
 	CGparameter vertexModelViewProj;
 	CGparameter geometryModelViewProj;
 	CGparameter geometrySF;
+	CGparameter pixelCameraEye;
+	CGparameter pixelCubeMap;
+	CGparameter pixelBackground;
 
 public:
 	ShaderOneInterface() {};

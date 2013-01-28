@@ -34,12 +34,27 @@ TRIANGLE void GeometryMain(AttribArray<VertexDataOutput> tverts, uniform float4x
 	return;
 }
 
-PixelDataOutput FragmentMain(VertexDataOutput pdi) {
+PixelDataOutput FragmentMain(VertexDataOutput pdi, 
+	uniform float3 cameraEye, 
+	uniform samplerCUBE envMap,
+	uniform float background) {
 
 	PixelDataOutput ret;
 
-	ret.color = pdi.color;
+	if(background != 1.0f){
+		float3 P0 = pdi.vertex;
+		float3 N0 = normalize(pdi.normal);
+		float3 L = normalize(P0 - cameraEye);
+		float3 V = normalize(L - 2*dot(L,N0)*N0);
+	
+		ret.color = texCUBE(envMap, V);
+	}else{
+		float3 P0 = pdi.vertex;
+		float3 V = normalize(P0 - cameraEye);
 
+		ret.color = texCUBE(envMap, V);
+	}
+	
 	return ret;
 }
 

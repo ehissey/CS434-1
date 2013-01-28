@@ -125,8 +125,44 @@ unsigned int Envmap::getColor(Vector3D dir){
 	return retval;
 }
 
-void Envmap::LoadHW(int texBinding){
-	texID = texBinding;
+void Envmap::LoadHW(){
+	int fi = 0;
+	glBindTexture(GL_TEXTURE_CUBE_MAP_EXT, texID);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	unsigned int * tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	tempPix = frames[fi]->convertPixToGLFormat();
+	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	delete tempPix;
+	fi++;
+	
+	/*texID = texBinding;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP_EXT, texBinding);
 
@@ -151,5 +187,5 @@ void Envmap::LoadHW(int texBinding){
 	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, frames[fi]->pix);
 	fi++;
 	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, frames[fi]->pix);
-	fi++;
+	fi++;*/
 }

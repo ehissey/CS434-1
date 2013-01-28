@@ -69,8 +69,6 @@ Scene::Scene(){
 	refPPC = 0;
 	refFB = 0;
 
-	env = new Envmap();
-
 	Render();
 }
 
@@ -467,40 +465,7 @@ void Scene::InitializeHW(){
 	delete texs;
 
 	if(env){
-		int fi = 0;
-		glBindTexture(GL_TEXTURE_CUBE_MAP_EXT, env->texID);
-
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		unsigned int * tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
-		tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
-		tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
-		tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
-		tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
-		tempPix = env->frames[fi]->convertPixToGLFormat();
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, GL_RGBA8, env->frames[fi]->w, env->frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
-		delete tempPix;
-		fi++;
+		
 	}
 }
 
@@ -522,7 +487,7 @@ void Scene::InitializeHWObjects(){
 		currObject->gouraud = false;
 		currObject->phong = false;
 		currObject->phongExp = 40.0f;
-		currObject->enableShader = false;
+		currObject->enableShader = true;
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
@@ -545,7 +510,7 @@ void Scene::InitializeHWObjects(){
 		currObject->gouraud = false;
 		currObject->phong = false;
 		currObject->phongExp = 40.0f;
-		currObject->enableShader = false;
+		currObject->enableShader = true;
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
@@ -615,9 +580,10 @@ void Scene::RenderRefHW(){
 
 void Scene::RenderGPU(){
 	if(!initializedHW){
-		//env = new Envmap();
-		//env->texID = 500;
-		env = 0;
+		env = new Envmap();
+		env->texID = 500;
+		env->LoadHW();
+		//env = 0;
 		InitializeHW();
 		InitializeHWObjects();
 		initializedHW = true;
@@ -639,7 +605,6 @@ void Scene::RenderGPU(){
 	ppc->SetIntrinsicsHW();
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
-	settingRefMatrix = false;
 	
 	if(env){
 		renderingBackground = 1.0f;
@@ -652,8 +617,6 @@ void Scene::RenderGPU(){
 	}
 
 	soi->PerFrameInit();
-	ppc->SetIntrinsicsHW();
-	ppc->SetExtrinsicsHW();
 	soi->BindPrograms();
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){

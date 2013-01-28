@@ -14,5 +14,5 @@ public:
 	Envmap();
 	~Envmap();
 	unsigned int getColor(Vector3D dir);
-	void LoadHW(int texBinding);
+	void LoadHW();
 };
