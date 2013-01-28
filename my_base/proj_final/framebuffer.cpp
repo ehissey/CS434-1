@@ -254,16 +254,19 @@ void DebugBreak(){
 }
 
 void FrameBuffer::MouseDragHandle(){
-	float rs = 0.5f;
+	float rs = 0.1f;
 	int mouse_dx = Fl::event_x() - mouseX;
 	int mouse_dy = Fl::event_y() - mouseY;
 	mouseX = Fl::event_x();
 	mouseY = Fl::event_y();
 	cout << "dx: " << mouse_dx << "\tdy" << mouse_dy << endl;
 	
-	scene->ppc->Pan(rs*mouse_dx);
-	scene->ppc->Roll(rs*mouse_dy);
-
+	if(mouse_dx != 0){
+		scene->ppc->Pan(rs*mouse_dx);
+	}
+	if(mouse_dy != 0){
+		scene->ppc->Roll(rs*mouse_dy);
+	}
 	scene->Render();
 }
 

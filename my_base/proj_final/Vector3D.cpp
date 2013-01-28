@@ -133,7 +133,7 @@ Vector3D Vector3D::rotate(Vector3D p1, Vector3D p2, float angle){
 }
 
 Vector3D Vector3D::rotate(Vector3D p1, float angle){
-	Vector3D retval = rotate(Vector3D(0,0,0), p1, angle);
+	Vector3D retval = rotate(Vector3D(0.0f,0.0f,0.0f), p1, angle);
 
 	return retval;
 }
