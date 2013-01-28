@@ -232,6 +232,16 @@ int FrameBuffer::handle(int event){
 	case FL_KEYBOARD:
 		KeyboardHandle();
 		return 0;
+	case FL_MOUSEWHEEL:
+		MouseWheelHandle();
+		return 0;
+	case FL_PUSH:
+		mouseX = Fl::event_x();
+		mouseY = Fl::event_y();
+		return 1;
+	case FL_DRAG:
+		MouseDragHandle();
+		return 0;
 	default:
 		break;
 	}
@@ -243,89 +253,83 @@ void DebugBreak(){
 	return;
 }
 
+void FrameBuffer::MouseDragHandle(){
+	float rs = 0.5f;
+	int mouse_dx = Fl::event_x() - mouseX;
+	int mouse_dy = Fl::event_y() - mouseY;
+	mouseX = Fl::event_x();
+	mouseY = Fl::event_y();
+	cout << "dx: " << mouse_dx << "\tdy" << mouse_dy << endl;
+	
+	scene->ppc->Pan(rs*mouse_dx);
+	scene->ppc->Roll(rs*mouse_dy);
+
+	scene->Render();
+}
+
+void FrameBuffer::MouseWheelHandle(){
+	int dy = Fl::event_dy();
+	float ts = 6.0f;
+
+	if(dy < 0){
+		scene->ppc->Translate('f', ts);
+	}else{
+		scene->ppc->Translate('b', ts);
+	}
+
+	scene->Render();
+}
+
 void FrameBuffer::KeyboardHandle(){
-	float ts = 3.0;
-	float rs = 3.0;
+	float ts = 6.0;
+	float rs = 6.0;
 	Vector3D p0,p1;
 	int key = Fl::event_key();
 
 	switch(key){
-	case 'w':{
+	case 'w':
 		scene->ppc->Translate('u', ts);
-		scene->Render();
 		break;
-			 }
-	case 'a':{
+	case 'a':
 		scene->ppc->Translate('l', ts);
-		scene->Render();
 		break;
-			 }
-	case 's':{
+	case 's':
 		scene->ppc->Translate('d', ts);
-		scene->Render();
 		break;
-			 }
-	case 'd':{
+	case 'd':
 		scene->ppc->Translate('r', ts);
-		scene->Render();
 		break;
-			 }
-	case 'r':{
+	case 'r':
 		scene->ppc->zoom(2.0f,'i');
-		scene->Render();
 		break;
-			 }
-	case 'f':{
+	case 'f':
 		scene->ppc->zoom(2.0f, 'o');
-		scene->Render();
 		break;
-			 }
-	case 't':{
-		scene->ppc->Translate('f', ts);
-		scene->Render();
-		break;
-			 }
-	case 'g':{
-		scene->ppc->Translate('b', ts);
-		scene->Render();
-		break;
-			 }
-	case FL_Left:{
+	case FL_Left:
 		scene->ppc->Pan(rs);
-		scene->Render();
 		break;
-				 }
-	case FL_Right:{
+	case FL_Right:
 		scene->ppc->Pan(-rs);
-		scene->Render();
 		break;
-				  }
-	case FL_Up:{
+	case FL_Up:
 		scene->ppc->Roll(rs);
-		scene->Render();
 		break;
-				 }
-	case FL_Down:{
+	case FL_Down:
 		scene->ppc->Roll(-rs);
-		scene->Render();
 		break;
-				  }
-	case 'e':{
+	case 'e':
 		scene->ppc->Tilt(rs);
-		scene->Render();
 		break;
-			}
-	case 'q':{
+	case 'q':
 		scene->ppc->Tilt(-rs);
-		scene->Render();
 		break;
-			}
 
-	default:{
+	default:
 		cerr << "Invalid key" << endl;
 		break;
-			}
 	}
+
+	scene->Render();
 }
 
 bool FrameBuffer::CloserThenSet(Vector3D P){

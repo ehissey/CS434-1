@@ -58,16 +58,18 @@ Scene::Scene(){
 		InitializeSWObjects();
 	}
 
-	refPPC = new PPC(hfov, w, h);
+	/*refPPC = new PPC(hfov, w, h);
 	refFB = new FrameBuffer(u0*15, v0*10, w, h);
 	refFB->isRef = true;
 	refFB->isHW = true;
 	refFB->label("Ref Frembuffer");
 	refFB->show();
 	settingRefMatrix = false;
-	RefLoadView0();
-	/*refPPC = 0;
-	refFB = 0;*/
+	RefLoadView0();*/
+	refPPC = 0;
+	refFB = 0;
+
+	env = new Envmap();
 
 	Render();
 }
@@ -503,7 +505,7 @@ void Scene::InitializeHW(){
 }
 
 void Scene::InitializeHWObjects(){
-		Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
+		Vector3D center = Vector3D(30.0f,0.0f,-170.0f);
 		float sl = 256.0;
 
 		currObject = new TMesh();
@@ -513,7 +515,8 @@ void Scene::InitializeHWObjects(){
 		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
 		Vector3D tcenter = currObject->GetCenter();
 		currObject->Translate(tcenter*-1.0f+center);
-		float size1 = 170.0;
+		float size1 = 100.0f;
+		cout << size0 << endl;
 		currObject->ScaleAboutCenter(size1/size0);
 		currObject->kamb = 0.20f;
 		currObject->gouraud = false;
@@ -525,11 +528,33 @@ void Scene::InitializeHWObjects(){
 		currGuiObject = currObject;
 		//delete currObject;
 
+
+		center = Vector3D(-30.0f,0.0f,-170.0f);
+
 		currObject = new TMesh();
+		currObject->Load("geometry/bunny.bin");
+
+		aabb = currObject->GetAABB();
+		size0 = (aabb.corners[1]-aabb.corners[0]).length();
+		tcenter = currObject->GetCenter();
+		currObject->Translate(tcenter*-1.0f+center);
+		size1 = 100.0f;
+		cout << size0 << endl;
+		currObject->ScaleAboutCenter(size1/size0);
+		currObject->kamb = 0.20f;
+		currObject->gouraud = false;
+		currObject->phong = false;
+		currObject->phongExp = 40.0f;
+		currObject->enableShader = false;
+		//currObject->reflectiveSF = 0.5f;
+		TMList.push_back(*currObject);
+		currGuiObject = currObject;
+
+		/*currObject = new TMesh();
 		currObject->loadProj8Quad(center);
 		currObject->enableShader = true;
 		TMList.push_back(*currObject);
-		proj8QuadHandle = currObject;
+		proj8QuadHandle = currObject;*/
 		//delete currObject;
 
 		//center = Vector3D(60.0f,0.0f,-170.0f);
@@ -627,15 +652,8 @@ void Scene::RenderGPU(){
 	}
 
 	soi->PerFrameInit();
-
-	refPPC->SetIntrinsicsHW();
-	refPPC->SetExtrinsicsHW();
-	settingRefMatrix = true;
-	soi->PerFrameInit();
-
 	ppc->SetIntrinsicsHW();
 	ppc->SetExtrinsicsHW();
-	settingRefMatrix = false;
 	soi->BindPrograms();
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){

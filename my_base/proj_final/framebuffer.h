@@ -16,6 +16,9 @@ public:
 		bool isHW;
 		bool isRef;
 
+		int mouseX;
+		int mouseY;
+
 		FrameBuffer();
 		FrameBuffer(int u0, int v0, int _w, int _h);
 		void Set(unsigned int color);
@@ -39,6 +42,8 @@ public:
 
 		int handle(int event);
 		void KeyboardHandle();
+		void MouseWheelHandle();
+		void MouseDragHandle();
 
 		void CopyFrom(FrameBuffer *fb);
 

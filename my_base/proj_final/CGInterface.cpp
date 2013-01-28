@@ -83,25 +83,17 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 
 	// build some parameters by name such that we can set them later...
 	vertexModelViewProj = cgGetNamedParameter(vertexProgram, "modelViewProj");
-	vertexRefModelViewProj = cgGetNamedParameter(vertexProgram, "refModelViewProj");
 	#ifdef GEOMETRY_SUPPORT
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
 		geometrySF = cgGetNamedParameter(geometryProgram, "sf");
 	#endif
-	pixelDepthMap = cgGetNamedParameter(pixelProgram, "depthMap");
 
 	return true;
 }
 
 void ShaderOneInterface::PerFrameInit(){
 	//set parameters
-	if(!scene->settingRefMatrix){
-		cgGLSetStateMatrixParameter(vertexModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	}else{
-		cgGLSetStateMatrixParameter(vertexRefModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-		cgGLSetTextureParameter(pixelDepthMap, 1024);
-		cgGLEnableTextureParameter(pixelDepthMap);
-	}
+	cgGLSetStateMatrixParameter(vertexModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#ifdef GEOMETRY_SUPPORT
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif

@@ -897,6 +897,11 @@ void TMesh::Load(char *fname) {
   cerr << "INFO: loaded " << vertsN << " verts, " << trisN << " tris from " << endl << "      " << fname << endl;
   cerr << "      xyz " << ((cols) ? "rgb " : "") << ((normals) ? "nxnynz " : "") << ((tcs) ? "tcstct " : "") << endl;
 
+
+  for(int i = 0; i < vertsN; i++){
+	float scale = (float)i/float(vertsN);
+	cols[i] = Vector3D(scale, scale, scale);
+  }
 }
 
 void TMesh::Translate(Vector3D transv){
@@ -915,7 +920,7 @@ void TMesh::ScaleAboutCenter(float s){
 }
 
 void TMesh::Scale(float s){
-	for(int i = 0; i > vertsN; i++){
+	for(int i = 0; i < vertsN; i++){
 		verts[i] = verts[i] * s;
 	}
 }

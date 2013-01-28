@@ -25,10 +25,8 @@ class ShaderOneInterface{
 	CGprogram pixelProgram;
 
 	CGparameter vertexModelViewProj;
-	CGparameter vertexRefModelViewProj;
 	CGparameter geometryModelViewProj;
 	CGparameter geometrySF;
-	CGparameter pixelDepthMap;
 
 public:
 	ShaderOneInterface() {};

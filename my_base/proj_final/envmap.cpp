@@ -11,32 +11,22 @@ Envmap::Envmap(){
 	cameras = 0;
 	texID = -1;
 
-	frames[0] = scene->openTIFF_FB("envmap/front.tiff");
+	frames[0] = scene->openTIFF_FB("envmap/front2.tiff");
 	frames[0]->label("Front");
-	frames[1] = scene->openTIFF_FB("envmap/left.tiff");
+	frames[1] = scene->openTIFF_FB("envmap/left2.tiff");
 	frames[1]->label("Left");
-	frames[2] = scene->openTIFF_FB("envmap/back.tiff");
+	frames[2] = scene->openTIFF_FB("envmap/back2.tiff");
 	frames[2]->label("Back");
-	frames[3] = scene->openTIFF_FB("envmap/right.tiff");
+	frames[3] = scene->openTIFF_FB("envmap/right2.tiff");
 	frames[3]->label("Right");
-	frames[4] = scene->openTIFF_FB("envmap/top.tiff");
+	frames[4] = scene->openTIFF_FB("envmap/top2.tiff");
 	frames[4]->label("Top");
-	frames[5] = scene->openTIFF_FB("envmap/bottom.tiff");
+	frames[5] = scene->openTIFF_FB("envmap/bottom2.tiff");
 	frames[5]->label("Bottom");
 
-	/*cameras[0] = new PPC();
-	cameras[0]->Load("envmap/front.txt");
-	cameras[1] = new PPC();
-	cameras[1]->Load("envmap/left.txt");
-	cameras[2] = new PPC();
-	cameras[2]->Load("envmap/back.txt");
-	cameras[3] = new PPC();
-	cameras[3]->Load("envmap/right.txt");
-	cameras[4] = new PPC();
-	cameras[4]->Load("envmap/top.txt");
-	cameras[5] = new PPC();
-	cameras[5]->Load("envmap/bottom.txt");*/
-
+	/*FrameBuffer * envMapFB = scene->openTIFF_FB("envmap/uffizi_cross.tiff");
+	envMapFB->show();*/
+	
 	for(int i = 0; i < 6; i++){
 		//frames[i]->show();
 		//cout << cameras[i]->GetVD() << endl;
