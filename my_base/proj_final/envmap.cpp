@@ -131,34 +131,42 @@ void Envmap::LoadHW(){
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	unsigned int * tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	tempPix = frames[fi]->convertPixToGLFormat();
-	gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	//gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, GL_RGBA8, frames[fi]->w, frames[fi]->h, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, 0, GL_RGBA8, frames[fi]->w, frames[fi]->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempPix);
 	delete tempPix;
 	fi++;
 	

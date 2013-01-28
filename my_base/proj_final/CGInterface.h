@@ -26,13 +26,31 @@ class ShaderOneInterface{
 
 	CGparameter vertexModelViewProj;
 	CGparameter geometryModelViewProj;
-	CGparameter geometrySF;
 	CGparameter pixelCameraEye;
 	CGparameter pixelCubeMap;
-	CGparameter pixelBackground;
+	//CGparameter pixelBackground;
 
 public:
 	ShaderOneInterface() {};
+	bool PerSessionInit(CGInterface *cgi);
+	void BindPrograms();
+	void PerFrameInit();
+	void PerFrameDisable();
+};
+
+class BgEnvMapShaderInterface{
+	CGprogram geometryProgram;
+	CGprogram vertexProgram;
+	CGprogram pixelProgram;
+
+	CGparameter vertexModelViewProj;
+	CGparameter geometryModelViewProj;
+	CGparameter pixelCameraEye;
+	CGparameter pixelCubeMap;
+	//CGparameter pixelBackground;
+
+public:
+	BgEnvMapShaderInterface() {};
 	bool PerSessionInit(CGInterface *cgi);
 	void BindPrograms();
 	void PerFrameInit();

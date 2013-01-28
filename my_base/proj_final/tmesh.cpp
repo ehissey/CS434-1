@@ -80,9 +80,9 @@ void TMesh::loadProj8Quad(Vector3D center){
 	}
 	tris = new unsigned int[trisN*3];
 
-	float dx = 100.0f;
-	float dy = -30.0f;
-	float dz = 300.0f;
+	float dx = 500.0f;
+	float dy = -60.0f;
+	float dz = 500.0f;
 
 	verts[0] = center + Vector3D(-dx, dy, -dz);
 	verts[1] = center + Vector3D(-dx, dy, dz);
@@ -111,9 +111,9 @@ void TMesh::loadProj8Quad(Vector3D center){
 	int mult = 1;
 
 	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
-	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
-	st[2] = mult*Vector3D(1.0f, 1.0f, 0.0f);
-	st[3] = mult*Vector3D(1.0f, 0.0f, 0.0f);
+	st[1] = mult*Vector3D(0.0f, 6.0f, 0.0f);
+	st[2] = mult*Vector3D(6.0f, 6.0f, 0.0f);
+	st[3] = mult*Vector3D(6.0f, 0.0f, 0.0f);
 
 	st_2D = new float[vertsN*2];
 
@@ -123,7 +123,7 @@ void TMesh::loadProj8Quad(Vector3D center){
 	}
 
 	texID = 8;
-	//textured = true;
+	textured = true;
 }
 
 void TMesh::SetDemoTexturedModel(Vector3D center){
@@ -897,10 +897,26 @@ void TMesh::Load(char *fname) {
   cerr << "INFO: loaded " << vertsN << " verts, " << trisN << " tris from " << endl << "      " << fname << endl;
   cerr << "      xyz " << ((cols) ? "rgb " : "") << ((normals) ? "nxnynz " : "") << ((tcs) ? "tcstct " : "") << endl;
 
+  float max = FLT_MIN;
+  float min = FLT_MAX;
 
   for(int i = 0; i < vertsN; i++){
-	float scale = (float)i/float(vertsN);
-	cols[i] = Vector3D(scale, scale, scale);
+	if(verts[i].coords[1] < min){
+		min = verts[i].coords[1];
+	}else if(verts[i].coords[1] > max){
+		max = verts[i].coords[1];
+	}
+  }
+
+  float range = max - min;
+
+  cout << "min: " << min << "\tmax: " << max << "\trange: " << range << endl;
+
+  for(int i = 0; i < vertsN; i++){
+	//float scale = (float)i/float(vertsN);
+	//cols[i] = Vector3D(scale, scale, scale);
+
+	cols[i] = Vector3D((verts[i].coords[1]-min)/range, 0.0f, 0.0f);
   }
 }
 

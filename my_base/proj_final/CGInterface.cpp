@@ -46,6 +46,22 @@ void CGInterface::PerSessionInit(){
 
 }
 
+void CGInterface::DisableProfiles(){	
+	cgGLDisableProfile(vertexCGprofile);
+	#ifdef GEOMETRY_SUPPORT
+		cgGLDisableProfile(geometryCGprofile);
+	#endif
+	cgGLDisableProfile(pixelCGprofile);
+}
+
+void CGInterface::EnableProfiles(){
+	cgGLEnableProfile(vertexCGprofile);
+	#ifdef GEOMETRY_SUPPORT
+		cgGLEnableProfile(geometryCGprofile);
+	#endif
+	cgGLEnableProfile(pixelCGprofile);
+}
+
 bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 	
 	#ifdef GEOMETRY_SUPPORT
@@ -85,12 +101,11 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 	vertexModelViewProj = cgGetNamedParameter(vertexProgram, "modelViewProj");
 	#ifdef GEOMETRY_SUPPORT
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
-		geometrySF = cgGetNamedParameter(geometryProgram, "sf");
 	#endif
 
 	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
 	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap" );
-	pixelBackground = cgGetNamedParameter(pixelProgram, "background");
+	//pixelBackground = cgGetNamedParameter(pixelProgram, "background");
 
 	return true;
 }
@@ -105,11 +120,7 @@ void ShaderOneInterface::PerFrameInit(){
 	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
 	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
     cgGLEnableTextureParameter(pixelCubeMap);
-	cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
-
-	#ifdef GEOMETRY_SUPPORT
-		cgGLSetParameter1f(geometrySF, scene->sf);
-	#endif
+	//cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
 }
 
 void ShaderOneInterface::PerFrameDisable(){
@@ -123,18 +134,77 @@ void ShaderOneInterface::BindPrograms(){
 	cgGLBindProgram(pixelProgram);
 }
 
-void CGInterface::DisableProfiles(){	
-	cgGLDisableProfile(vertexCGprofile);
+
+
+
+bool BgEnvMapShaderInterface::PerSessionInit(CGInterface *cgi){
+	
 	#ifdef GEOMETRY_SUPPORT
-		cgGLDisableProfile(geometryCGprofile);
+		geometryProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/BgEnvMapShader.cg", cgi->geometryCGprofile, "GeometryMain", NULL);
+		if(geometryProgram == NULL) {
+			CGerror Error = cgGetError();
+			cerr << "Shader One Geometry Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+			cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+			return false;
+		}
 	#endif
-	cgGLDisableProfile(pixelCGprofile);
+
+	vertexProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/BgEnvMapShader.cg", cgi->vertexCGprofile, "VertexMain", NULL);
+	if(vertexProgram == NULL){
+		CGerror Error = cgGetError();
+		cerr << "Shader One Geometry Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+		cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+		return false;
+	}
+
+	pixelProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/BgEnvMapShader.cg", cgi->pixelCGprofile, "FragmentMain", NULL);
+	if(pixelProgram == NULL) {
+		CGerror Error = cgGetError();
+		cerr << "Shader One Fragment Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+		cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+		return false;
+	}
+
+	// load programs
+	#ifdef GEOMETRY_SUPPORT
+		cgGLLoadProgram(geometryProgram);
+	#endif
+	cgGLLoadProgram(vertexProgram);
+	cgGLLoadProgram(pixelProgram);
+
+	// build some parameters by name such that we can set them later...
+	vertexModelViewProj = cgGetNamedParameter(vertexProgram, "modelViewProj");
+	#ifdef GEOMETRY_SUPPORT
+		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
+	#endif
+
+	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
+	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap" );
+	//pixelBackground = cgGetNamedParameter(pixelProgram, "background");
+
+	return true;
 }
 
-void CGInterface::EnableProfiles(){
-	cgGLEnableProfile(vertexCGprofile);
+void BgEnvMapShaderInterface::PerFrameInit(){
+	//set parameters
+	cgGLSetStateMatrixParameter(vertexModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#ifdef GEOMETRY_SUPPORT
-		cgGLEnableProfile(geometryCGprofile);
+		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
-	cgGLEnableProfile(pixelCGprofile);
+	
+	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
+	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
+    cgGLEnableTextureParameter(pixelCubeMap);
+	//cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
+}
+
+void BgEnvMapShaderInterface::PerFrameDisable(){
+}
+
+void BgEnvMapShaderInterface::BindPrograms(){
+	#ifdef GEOMETRY_SUPPORT
+		cgGLBindProgram(geometryProgram);
+	#endif
+	cgGLBindProgram(vertexProgram);
+	cgGLBindProgram(pixelProgram);
 }

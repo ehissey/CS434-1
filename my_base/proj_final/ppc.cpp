@@ -73,7 +73,7 @@ void PPC::Pan(float rs){
 	}
 
 	a = a.rotate(b.normalize()*-1.0f, rs);
-	b = b.rotate(b.normalize()*-1.0f, rs);
+	//b = b.rotate(b.normalize()*-1.0f, rs);
 	c = c.rotate(b.normalize()*-1.0f, rs);
 
 	SetPMat();
@@ -83,7 +83,7 @@ void PPC::Roll(float rs){
 		return;
 	}
 
-	a = a.rotate(a.normalize(), rs);
+	//a = a.rotate(a.normalize(), rs);
 	b = b.rotate(a.normalize(), rs);
 	c = c.rotate(a.normalize(), rs);
 
@@ -207,26 +207,30 @@ Vector3D PPC::GetPoint(float uf, float vf, float z) {
 
 void PPC::Save(char *fname){
 
-  ofstream ofs(fname);
-  ofs << a << endl;
-  ofs << b << endl;
-  ofs << c << endl;
-  ofs << C << endl;
-  ofs << "// a b c C" << endl;
-  ofs.close();
+	ofstream ofs(fname);
+	ofs << a << endl;
+	ofs << b << endl;
+	ofs << c << endl;
+	ofs << C << endl;
+	ofs << "// a b c C" << endl;
+	ofs.close();
 }
 
 
 void PPC::Load(char *fname){
 
-  ifstream ifs(fname);
-  ifs >> a ;
-  ifs >> b ;
-  ifs >> c ;
-  ifs >> C ;
-  ifs.close();
+	ifstream ifs(fname);
+	ifs >> a ;
+	ifs >> b ;
+	ifs >> c ;
+	ifs >> C ;
+	ifs.close();
 
-  SetPMat();
+	SetPMat();
+}
+
+void PPC::Print(){
+	cout << "a: " << a << "\tb: " << b << "\tc: " << c << "\tC: " << C << endl;
 }
 
 void PPC::SetPMat(){

@@ -31,6 +31,7 @@ public:
 
 	void Save(char *fname);
 	void Load(char *fname);
+	void Print();
 	Vector3D GetRay(float uf, float vf);
 	Vector3D GetPoint(Vector3D projP);
 	Vector3D GetPoint(float uf, float vf, float z);

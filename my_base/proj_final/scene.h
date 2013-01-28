@@ -19,6 +19,7 @@ public:
 	// gpu programming
 	CGInterface *cgi;
 	ShaderOneInterface *soi;
+	BgEnvMapShaderInterface *bemsi;
 
 	GUI *gui;
 	PPC *ppc, *refPPC;
@@ -37,10 +38,6 @@ public:
 	float renderingBackground;
 
 	void SetGLDemoTexturedModel(Vector3D center);
-	
-	// lighting
-	Vector3D lightDirv;
-	float sf;
 
 	Scene();
 	void DBG();

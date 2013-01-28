@@ -23,8 +23,6 @@ Scene::Scene(){
 	wireframe = false;
 	initializedHW = false;
 	initializedGPU = false;
-	sf = 0.6f;
-	lightDirv = Vector3D(0.0f, 0.0f, 1.0f);
 
 	int u0 = 20;
 	int v0 = 50;
@@ -45,6 +43,7 @@ Scene::Scene(){
 	hwFB->show();
 	cgi = new CGInterface();
 	soi = new ShaderOneInterface();
+	bemsi = new BgEnvMapShaderInterface();
 	//hwFB = 0;
 
 	float hfov = 45.0f;
@@ -68,6 +67,8 @@ Scene::Scene(){
 	RefLoadView0();*/
 	refPPC = 0;
 	refFB = 0;
+
+	ppc->Print();
 
 	Render();
 }
@@ -510,16 +511,18 @@ void Scene::InitializeHWObjects(){
 		currObject->gouraud = false;
 		currObject->phong = false;
 		currObject->phongExp = 40.0f;
-		currObject->enableShader = true;
+		currObject->enableShader = false;
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
 
-		/*currObject = new TMesh();
+		center = Vector3D(0.0f,0.0f,-170.0f);
+
+		currObject = new TMesh();
 		currObject->loadProj8Quad(center);
-		currObject->enableShader = true;
+		currObject->enableShader = false;
 		TMList.push_back(*currObject);
-		proj8QuadHandle = currObject;*/
+		//proj8QuadHandle = currObject;
 		//delete currObject;
 
 		//center = Vector3D(60.0f,0.0f,-170.0f);
@@ -592,6 +595,7 @@ void Scene::RenderGPU(){
 	if(!initializedGPU){
 		cgi->PerSessionInit();
 		soi->PerSessionInit(cgi);
+		bemsi->PerSessionInit(cgi);
 		initializedGPU = true;
 	}
 
@@ -606,17 +610,16 @@ void Scene::RenderGPU(){
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
 	
+	soi->PerFrameInit();
+	bemsi->PerFrameInit();
+
 	if(env){
-		renderingBackground = 1.0f;
-		soi->PerFrameInit();
-		soi->BindPrograms();
+		bemsi->BindPrograms();
 		cgi->EnableProfiles();
 		ppc->RenderImageFrameGL();
 		cgi->DisableProfiles();
-		renderingBackground = 0.0f;
 	}
 
-	soi->PerFrameInit();
 	soi->BindPrograms();
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
@@ -634,6 +637,7 @@ void Scene::RenderGPU(){
 	}
 
 	soi->PerFrameDisable();
+	bemsi->PerFrameDisable();
 }
 
 void Scene::RenderRefGPU(){
