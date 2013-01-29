@@ -104,8 +104,14 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 	#endif
 
 	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
-	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap" );
-	//pixelBackground = cgGetNamedParameter(pixelProgram, "background");
+	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap");
+	pixelQuadV0 = cgGetNamedParameter(pixelProgram, "quadV0");
+	pixelQuadV1 = cgGetNamedParameter(pixelProgram, "quadV1");
+	pixelQuadV2 = cgGetNamedParameter(pixelProgram, "quadV2");
+	pixelQuadV3 = cgGetNamedParameter(pixelProgram, "quadV3");
+	pixelQuadTex = cgGetNamedParameter(pixelProgram, "quadTex");
+	pixelDepthImageZ = cgGetNamedParameter(pixelProgram, "depthImageZ");
+	pixelDepthImageRGB = cgGetNamedParameter(pixelProgram, "depthImageRGB");	
 
 	return true;
 }
@@ -120,7 +126,17 @@ void ShaderOneInterface::PerFrameInit(){
 	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
 	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
     cgGLEnableTextureParameter(pixelCubeMap);
-	//cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
+	cgGLSetParameter3fv(pixelQuadV0, (float*)&(scene->quadHandle->verts[0]));
+	cgGLSetParameter3fv(pixelQuadV1, (float*)&(scene->quadHandle->verts[1]));
+	cgGLSetParameter3fv(pixelQuadV2, (float*)&(scene->quadHandle->verts[2]));
+	cgGLSetParameter3fv(pixelQuadV3, (float*)&(scene->quadHandle->verts[3]));
+	cgGLSetTextureParameter(pixelQuadTex, scene->quadHandle->texID);
+    cgGLEnableTextureParameter(pixelQuadTex);
+	cgGLSetTextureParameter(pixelDepthImageZ, scene->DI->depthTexID);
+    cgGLEnableTextureParameter(pixelDepthImageZ);
+	cgGLSetTextureParameter(pixelDepthImageRGB, scene->DI->rgbTexID);
+    cgGLEnableTextureParameter(pixelDepthImageRGB);
+	
 }
 
 void ShaderOneInterface::PerFrameDisable(){

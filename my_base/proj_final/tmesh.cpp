@@ -66,7 +66,7 @@ void TMesh::SetDemoProjTexturedModel(Vector3D center){
 	}
 }
 
-void TMesh::loadProj8Quad(Vector3D center){
+void TMesh::setTexturedQuad(Vector3D center){
 	vertsN = 4;
 	if(verts){
 		free(verts);
@@ -80,9 +80,9 @@ void TMesh::loadProj8Quad(Vector3D center){
 	}
 	tris = new unsigned int[trisN*3];
 
-	float dx = 500.0f;
-	float dy = -60.0f;
-	float dz = 500.0f;
+	float dx = 1000.0f;
+	float dy = -40.0f;
+	float dz = 1000.0f;
 
 	verts[0] = center + Vector3D(-dx, dy, -dz);
 	verts[1] = center + Vector3D(-dx, dy, dz);
@@ -108,12 +108,12 @@ void TMesh::loadProj8Quad(Vector3D center){
 
 	st = new Vector3D[vertsN];
 
-	int mult = 1;
+	int mult = 5;
 
 	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
-	st[1] = mult*Vector3D(0.0f, 6.0f, 0.0f);
-	st[2] = mult*Vector3D(6.0f, 6.0f, 0.0f);
-	st[3] = mult*Vector3D(6.0f, 0.0f, 0.0f);
+	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
+	st[2] = mult*Vector3D(1.0f, 1.0f, 0.0f);
+	st[3] = mult*Vector3D(1.0f, 0.0f, 0.0f);
 
 	st_2D = new float[vertsN*2];
 
@@ -897,26 +897,34 @@ void TMesh::Load(char *fname) {
   cerr << "INFO: loaded " << vertsN << " verts, " << trisN << " tris from " << endl << "      " << fname << endl;
   cerr << "      xyz " << ((cols) ? "rgb " : "") << ((normals) ? "nxnynz " : "") << ((tcs) ? "tcstct " : "") << endl;
 
-  float max = FLT_MIN;
-  float min = FLT_MAX;
+  float max_y = FLT_MIN;
+  float min_y = FLT_MAX;
+  float max_z = FLT_MIN;
+  float min_z = FLT_MAX;
 
   for(int i = 0; i < vertsN; i++){
-	if(verts[i].coords[1] < min){
-		min = verts[i].coords[1];
-	}else if(verts[i].coords[1] > max){
-		max = verts[i].coords[1];
+	if(verts[i].coords[1] < min_y){
+		min_y = verts[i].coords[1];
+	}else if(verts[i].coords[1] > max_y){
+		max_y = verts[i].coords[1];
+	}
+
+	if(verts[i].coords[2] < min_z){
+		min_z = verts[i].coords[2];
+	}else if(verts[i].coords[2] > max_z){
+		max_z = verts[i].coords[2];
 	}
   }
 
-  float range = max - min;
+  float range_y = max_y - min_y;
+  float range_z = max_z - min_z;
 
-  cout << "min: " << min << "\tmax: " << max << "\trange: " << range << endl;
+  //cout << min_y << endl;
 
   for(int i = 0; i < vertsN; i++){
-	//float scale = (float)i/float(vertsN);
-	//cols[i] = Vector3D(scale, scale, scale);
-
-	cols[i] = Vector3D((verts[i].coords[1]-min)/range, 0.0f, 0.0f);
+	float scale_y = (verts[i].coords[1]-min_y)/range_y;
+	float scale_z = (verts[i].coords[2]-min_z)/range_z;
+	cols[i] = Vector3D(scale_y*scale_z, 0.0f, 0.0f);
   }
 }
 

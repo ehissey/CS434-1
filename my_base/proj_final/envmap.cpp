@@ -11,17 +11,17 @@ Envmap::Envmap(){
 	cameras = 0;
 	texID = -1;
 
-	frames[0] = scene->openTIFF_FB("envmap/front2.tiff");
+	frames[0] = scene->openTIFF_FB("envmap/front.tiff");
 	frames[0]->label("Front");
-	frames[1] = scene->openTIFF_FB("envmap/left2.tiff");
+	frames[1] = scene->openTIFF_FB("envmap/left.tiff");
 	frames[1]->label("Left");
-	frames[2] = scene->openTIFF_FB("envmap/back2.tiff");
+	frames[2] = scene->openTIFF_FB("envmap/back.tiff");
 	frames[2]->label("Back");
-	frames[3] = scene->openTIFF_FB("envmap/right2.tiff");
+	frames[3] = scene->openTIFF_FB("envmap/right.tiff");
 	frames[3]->label("Right");
-	frames[4] = scene->openTIFF_FB("envmap/top2.tiff");
+	frames[4] = scene->openTIFF_FB("envmap/top.tiff");
 	frames[4]->label("Top");
-	frames[5] = scene->openTIFF_FB("envmap/bottom2.tiff");
+	frames[5] = scene->openTIFF_FB("envmap/bottom.tiff");
 	frames[5]->label("Bottom");
 
 	/*FrameBuffer * envMapFB = scene->openTIFF_FB("envmap/uffizi_cross.tiff");

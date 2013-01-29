@@ -49,6 +49,15 @@ Scene::Scene(){
 	float hfov = 45.0f;
 	ppc = new PPC(hfov, w, h);
 	
+	InitializeHWObjects();
+	DI = new DepthImage(diffuseObjectHandle);
+	if(DI){
+		if(!DI->rendered){
+			DI->frame->show();
+			DI->frame->redraw();
+		}
+	}
+
 	if(!hwFB){
 		fb = new FrameBuffer(u0,v0,w,h);
 		fb->label("FrameBuffer");
@@ -68,9 +77,12 @@ Scene::Scene(){
 	refPPC = 0;
 	refFB = 0;
 
-	ppc->Print();
+	//DI = 0;
 
 	Render();
+
+	cout << "here" << endl;
+	Fl::check();
 }
 
 void Scene::InitializeSWObjects(){
@@ -103,6 +115,7 @@ void Scene::InitializeSWObjects(){
 
 	//env = new Envmap();
 	env = 0;
+	
 
 	//ppc->Translate('f', 170.0f);
 	//ppc->Roll(90.0f);
@@ -471,7 +484,7 @@ void Scene::InitializeHW(){
 }
 
 void Scene::InitializeHWObjects(){
-		Vector3D center = Vector3D(30.0f,0.0f,-170.0f);
+		Vector3D center = Vector3D(40.0f,0.0f,-170.0f);
 		float sl = 256.0;
 
 		currObject = new TMesh();
@@ -481,8 +494,7 @@ void Scene::InitializeHWObjects(){
 		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
 		Vector3D tcenter = currObject->GetCenter();
 		currObject->Translate(tcenter*-1.0f+center);
-		float size1 = 100.0f;
-		cout << size0 << endl;
+		float size1 = 90.0f;
 		currObject->ScaleAboutCenter(size1/size0);
 		currObject->kamb = 0.20f;
 		currObject->gouraud = false;
@@ -492,10 +504,8 @@ void Scene::InitializeHWObjects(){
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
-		//delete currObject;
 
-
-		center = Vector3D(-30.0f,0.0f,-170.0f);
+		center = Vector3D(-40.0f,0.0f,-170.0f);
 
 		currObject = new TMesh();
 		currObject->Load("geometry/bunny.bin");
@@ -504,8 +514,7 @@ void Scene::InitializeHWObjects(){
 		size0 = (aabb.corners[1]-aabb.corners[0]).length();
 		tcenter = currObject->GetCenter();
 		currObject->Translate(tcenter*-1.0f+center);
-		size1 = 100.0f;
-		cout << size0 << endl;
+		size1 = 90.0f;
 		currObject->ScaleAboutCenter(size1/size0);
 		currObject->kamb = 0.20f;
 		currObject->gouraud = false;
@@ -515,14 +524,15 @@ void Scene::InitializeHWObjects(){
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
+		diffuseObjectHandle = currObject;
 
 		center = Vector3D(0.0f,0.0f,-170.0f);
 
 		currObject = new TMesh();
-		currObject->loadProj8Quad(center);
+		currObject->setTexturedQuad(center);
 		currObject->enableShader = false;
 		TMList.push_back(*currObject);
-		//proj8QuadHandle = currObject;
+		quadHandle = currObject;
 		//delete currObject;
 
 		//center = Vector3D(60.0f,0.0f,-170.0f);
@@ -587,8 +597,12 @@ void Scene::RenderGPU(){
 		env->texID = 500;
 		env->LoadHW();
 		//env = 0;
+
 		InitializeHW();
-		InitializeHWObjects();
+		//InitializeHWObjects();
+
+		//DI = new DepthImage(diffuseObjectHandle);
+
 		initializedHW = true;
 	}
 	

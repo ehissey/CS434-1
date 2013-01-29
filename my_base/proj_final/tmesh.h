@@ -64,7 +64,7 @@ public:
 
 	void SetDemoProjTexturedModel(Vector3D center);
 
-	void loadProj8Quad(Vector3D center);
+	void setTexturedQuad(Vector3D center);
 
 	FrameBuffer *projTM;
 	PPC *projPPC;

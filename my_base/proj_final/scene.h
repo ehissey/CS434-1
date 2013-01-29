@@ -8,6 +8,7 @@
 #include "tmesh.h"
 #include "pointlight.h"
 #include "envmap.h"
+#include "depthimage.h"
 #include "CGInterface.h"
 
 #include <string>
@@ -27,10 +28,12 @@ public:
 	map<string,int> texNameToIDMap;
 	TMesh *currObject;
 	TMesh *currGuiObject;
-	TMesh *proj8QuadHandle;
+	TMesh *quadHandle;
+	TMesh *diffuseObjectHandle;
 	FrameBuffer *fb, *refFB, *hwFB;
 	PointLight *pl;
 	Envmap *env;
+	DepthImage *DI;
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;

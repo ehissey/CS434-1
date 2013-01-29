@@ -18,6 +18,8 @@ FrameBuffer::FrameBuffer(int u0, int v0, int _w, int _h) : Fl_Gl_Window(u0, v0, 
 	zb = new float[w*h];
 	Set(0xFFFFFFFF);
 	isHW = false;
+	isDI = false;
+	isRef = false;
 }
 
 FrameBuffer::~FrameBuffer(){
@@ -31,11 +33,11 @@ void FrameBuffer::SetZB(float z0){
 }
 
 void FrameBuffer::draw(){
-	if(isHW && !isRef){
+	if(isHW && !isRef && !isDI){
 		//scene->RenderHW(); //fixed pipeline
 		scene->RenderGPU(); //programmable pipeline
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-	}else if(isRef && isHW){
+	}else if(isRef && isHW && !isDI){
 		scene->RenderRefHW(); //fixed pipeline
 		//scene->RenderRefGPU(); //programmable pipeline
 		
@@ -87,6 +89,39 @@ void FrameBuffer::draw(){
 		//delete tempPix;
 
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+	}else if(isDI){
+		//cout << "HERE" << endl;
+		scene->DI->renderImage();
+		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, zb);
+
+		glBindTexture(GL_TEXTURE_2D, scene->DI->depthTexID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		//unsigned int * tempPix = convertPixToGLFormat();
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
+
+		glBindTexture(GL_TEXTURE_2D, scene->DI->rgbTexID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);
+
+		//cout << "done" << endl;
+		scene->DI->rendered = true;
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}

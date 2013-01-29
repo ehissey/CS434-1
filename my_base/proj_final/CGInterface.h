@@ -28,8 +28,14 @@ class ShaderOneInterface{
 	CGparameter geometryModelViewProj;
 	CGparameter pixelCameraEye;
 	CGparameter pixelCubeMap;
-	//CGparameter pixelBackground;
-
+	CGparameter pixelQuadV0;
+	CGparameter pixelQuadV1;
+	CGparameter pixelQuadV2;
+	CGparameter pixelQuadV3;
+	CGparameter pixelQuadTex;
+	CGparameter pixelDepthImageZ;
+	CGparameter pixelDepthImageRGB;
+	
 public:
 	ShaderOneInterface() {};
 	bool PerSessionInit(CGInterface *cgi);
@@ -47,7 +53,6 @@ class BgEnvMapShaderInterface{
 	CGparameter geometryModelViewProj;
 	CGparameter pixelCameraEye;
 	CGparameter pixelCubeMap;
-	//CGparameter pixelBackground;
 
 public:
 	BgEnvMapShaderInterface() {};

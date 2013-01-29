@@ -15,6 +15,7 @@ public:
 		int w, h;
 		bool isHW;
 		bool isRef;
+		bool isDI;
 
 		int mouseX;
 		int mouseY;

@@ -82,6 +82,7 @@
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="CGInterface.h" />
+    <ClInclude Include="depthimage.h" />
     <ClInclude Include="envmap.h" />
     <ClInclude Include="framebuffer.h" />
     <ClInclude Include="gui.h" />
@@ -95,6 +96,7 @@
   <ItemGroup>
     <ClCompile Include="aabb.cpp" />
     <ClCompile Include="CGInterface.cpp" />
+    <ClCompile Include="depthimage.cpp" />
     <ClCompile Include="envmap.cpp" />
     <ClCompile Include="framebuffer.cpp" />
     <ClCompile Include="gui.cxx" />
