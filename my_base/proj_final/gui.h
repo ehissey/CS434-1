@@ -6,7 +6,6 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Input.H>
-#include <FL/Fl_Choice.H>
 
 class GUI {
 public:
@@ -15,18 +14,8 @@ public:
 private:
   void cb_DBG_i(Fl_Button*, void*);
   static void cb_DBG(Fl_Button*, void*);
-  void cb_Open_i(Fl_Button*, void*);
-  static void cb_Open(Fl_Button*, void*);
   void cb_Quit_i(Fl_Button*, void*);
   static void cb_Quit(Fl_Button*, void*);
-  void cb_Write_i(Fl_Button*, void*);
-  static void cb_Write(Fl_Button*, void*);
-public:
-  Fl_Input *openInput;
-  Fl_Input *writeInput;
-private:
-  void cb_Find_i(Fl_Button*, void*);
-  static void cb_Find(Fl_Button*, void*);
   void cb_Pan_i(Fl_Button*, void*);
   static void cb_Pan(Fl_Button*, void*);
   void cb_Pan1_i(Fl_Button*, void*);
@@ -56,12 +45,6 @@ private:
   void cb_Zoom1_i(Fl_Button*, void*);
   static void cb_Zoom1(Fl_Button*, void*);
 public:
-  Fl_Choice *objectChoice;
-  static Fl_Menu_Item menu_objectChoice[];
-private:
-  void cb_Load_i(Fl_Button*, void*);
-  static void cb_Load(Fl_Button*, void*);
-public:
   Fl_Input *scaleFactor;
 private:
   void cb_Rot_i(Fl_Button*, void*);
@@ -76,10 +59,10 @@ private:
   static void cb_Wireframe1(Fl_Button*, void*);
   void cb_Save_i(Fl_Button*, void*);
   static void cb_Save(Fl_Button*, void*);
+  void cb_Load_i(Fl_Button*, void*);
+  static void cb_Load(Fl_Button*, void*);
   void cb_Load1_i(Fl_Button*, void*);
   static void cb_Load1(Fl_Button*, void*);
-  void cb_Load2_i(Fl_Button*, void*);
-  static void cb_Load2(Fl_Button*, void*);
   void cb_Save1_i(Fl_Button*, void*);
   static void cb_Save1(Fl_Button*, void*);
   void cb_Go_i(Fl_Button*, void*);
@@ -110,10 +93,6 @@ public:
   Fl_Input *ambientInput;
   Fl_Input *exponentInput;
 private:
-  void cb_Tex_i(Fl_Button*, void*);
-  static void cb_Tex(Fl_Button*, void*);
-  void cb_Tex1_i(Fl_Button*, void*);
-  static void cb_Tex1(Fl_Button*, void*);
   void cb_Ref_i(Fl_Button*, void*);
   static void cb_Ref(Fl_Button*, void*);
   void cb_Ref1_i(Fl_Button*, void*);
@@ -158,10 +137,7 @@ public:
   Fl_Input *refScaleFactor;
   void show();
   void DBG_cb();
-  void openTIFF_cb();
   void quit_cb();
-  void writeTIFF_cb();
-  void findEdges_cb();
   void panLeft_cb();
   void panRight_cb();
   void tiltLeft_cb();
@@ -174,7 +150,6 @@ public:
   void transDown_cb();
   void transForward_cb();
   void transBackward_cb();
-  void loadObject_cb();
   void zoomIn_cb();
   void zoomOut_cb();
   void rotObjX_cb();
@@ -198,8 +173,6 @@ public:
   void lightBackward_cb();
   void setAmbient_cb();
   void setExponent_cb();
-  void texRepetition_cb();
-  void texMirror_cb();
   void refPanLeft_cb();
   void refPanRight_cb();
   void refTiltLeft_cb();

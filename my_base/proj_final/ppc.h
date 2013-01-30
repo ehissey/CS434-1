@@ -39,4 +39,6 @@ public:
 	void SetIntrinsicsHW();
 	void SetExtrinsicsHW();
 	void RenderImageFrameGL();
+
+	void copy(PPC *p);
 };

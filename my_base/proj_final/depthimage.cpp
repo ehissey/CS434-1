@@ -1,22 +1,43 @@
 #include "scene.h"
 #include "depthimage.h"
 
-DepthImage::DepthImage(TMesh * diffuseObject){
-	object = diffuseObject;
-	
-	int u0 = 400;
-	int v0 = 400;
-	int w = 640;
-	int h = 480;
+DepthImage::DepthImage(FrameBuffer * frame, PPC * ppc, TMesh * diffuseObject, int rID, int dID){
+	this->diffuseObject = diffuseObject;
+	camera = new PPC();
+	camera->copy(ppc);
+	depthTexID = dID;
+	rgbTexID = rID;
 
-	frame = new FrameBuffer(u0, v0, w, h);
+	u0 = 1000;
+	v0 = 500;
+	w = 640;
+	h = 480;
+
+	rgb = new unsigned int[w*h];
+	depths = new float[w*h];
+	
+	rendered = false;
+
+	frame->isDI = true;
+	frame->redraw();
+	//Fl::flush();
+	
+	//while(!rendered){
+	//	;
+	//}
+
+	//frame->isDI = false;
+
+	//system("pause");
+
+	/*frame = new FrameBuffer(u0, v0, w, h);
 	frame->label("Depth Image");
 	frame->isHW = false;
 	frame->isRef = false;
-	frame->isDI = true;
+	frame->isDI = true;*/
 	//frame->show();
 
-	float hfov = 65.0f;
+	/*float hfov = 65.0f;
 	camera = new PPC(hfov, w, h);
 
 	Vector3D center = object->GetCenter();
@@ -29,11 +50,14 @@ DepthImage::DepthImage(TMesh * diffuseObject){
 	rendered = false;
 	depthTexID = 512;
 	rgbTexID = 513;
-//	frame->redraw();
+//	frame->redraw();*/
+
+
 }
 
 DepthImage::~DepthImage(){
-	delete frame;
+	delete rgb;
+	delete depths;
 	delete camera;
 }
 
@@ -55,8 +79,38 @@ void DepthImage::renderImage(){
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		object->RenderHW();
+		diffuseObject->RenderHW();
 
-		//rendered = true;
+		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, rgb);
+		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, depths);
+
+		glBindTexture(GL_TEXTURE_2D, depthTexID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		//unsigned int * tempPix = convertPixToGLFormat();
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depths);
+
+		glBindTexture(GL_TEXTURE_2D, rgbTexID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb);
+
+		cout << "done" << endl;
+
+		rendered = true;
 	}
 }

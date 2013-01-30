@@ -28,4 +28,6 @@ public:
 	Matrix3x3 transpose();
 	Matrix3x3 copy();
 	Matrix3x3 adjoint();
+
+	void copy(Matrix3x3 a);
 };

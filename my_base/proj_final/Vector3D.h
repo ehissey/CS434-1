@@ -37,4 +37,6 @@ public:
 	unsigned int GetColor();
 
 	void absolute();
+
+	void copy(Vector3D a);
 };

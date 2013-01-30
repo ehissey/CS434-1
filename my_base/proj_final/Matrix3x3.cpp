@@ -168,5 +168,8 @@ Matrix3x3 Matrix3x3::adjoint(){
 	return retval;
 }
 
-
-
+void Matrix3x3::copy(Matrix3x3 a){
+	rows[0].copy(a.rows[0]);
+	rows[1].copy(a.rows[1]);
+	rows[2].copy(a.rows[2]);
+}

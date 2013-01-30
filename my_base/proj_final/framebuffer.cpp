@@ -35,16 +35,17 @@ void FrameBuffer::SetZB(float z0){
 void FrameBuffer::draw(){
 	if(isHW && !isRef && !isDI){
 		//scene->RenderHW(); //fixed pipeline
+		cout << "rendering" << endl;
 		scene->RenderGPU(); //programmable pipeline
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}else if(isRef && isHW && !isDI){
-		scene->RenderRefHW(); //fixed pipeline
+		//scene->RenderRefHW(); //fixed pipeline
 		//scene->RenderRefGPU(); //programmable pipeline
 		
 		//SetZB(0.0f);
 		//Set(1.0f);
 		
-		glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
+		/*glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
 
 		float zmin = 1.0f;
 		float zmax = 0.0f;
@@ -88,11 +89,11 @@ void FrameBuffer::draw(){
 
 		//delete tempPix;
 
-		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
 	}else if(isDI){
 		//cout << "HERE" << endl;
 		scene->DI->renderImage();
-		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		/*glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, zb);
 
 		glBindTexture(GL_TEXTURE_2D, scene->DI->depthTexID);
@@ -121,7 +122,7 @@ void FrameBuffer::draw(){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);
 
 		//cout << "done" << endl;
-		scene->DI->rendered = true;
+		scene->DI->rendered = true;*/
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}

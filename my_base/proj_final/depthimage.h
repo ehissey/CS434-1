@@ -6,14 +6,19 @@
 
 class DepthImage{
 public:
-	FrameBuffer* frame;
-	PPC* camera;
-	TMesh * object;
+	unsigned int * rgb;
+	float * depths;
+	PPC * camera;
+	TMesh * diffuseObject;
 	int rgbTexID;
 	int depthTexID;
 	bool rendered;
+	int u0;
+	int v0;
+	int w;
+	int h;
 
-	DepthImage(TMesh * diffuseObject);
+	DepthImage(FrameBuffer * frame, PPC * ppc, TMesh * diffuseObject, int rID, int dID);
 	~DepthImage();
 	void renderImage();
 };

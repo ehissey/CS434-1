@@ -37,10 +37,6 @@ public:
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;
-	bool settingRefMatrix;
-	float renderingBackground;
-
-	void SetGLDemoTexturedModel(Vector3D center);
 
 	Scene();
 	void DBG();
@@ -55,16 +51,8 @@ public:
 	void InitializeSWObjects();
 
 	void writeCurrFrame(int currFrame, FrameBuffer *frame);
-	void openTIFF(string filename);
 	FrameBuffer * openTIFF_FB(string filename);
-	void writeTIFF(string filename);
 	void writeTIFF(string filename, FrameBuffer *frame);
-
-	void FindEdges();
-
-	void loadObject(const char * objectName);
-
-	void drawPPC();
 
 	void quit();
 
@@ -87,10 +75,6 @@ public:
 	void setAmbient(const char * input);
 	void setExponent(const char * input);
 
-	void setTexRepetition();
-	void setTexMirror();
-
-	void ProjectiveTextureMappingSetup();
 	void RefGoToView0();
 	void RefGoToView1();
 	void RefSaveView0();
@@ -98,8 +82,6 @@ public:
 	void RefSaveView1();
 	void RefLoadView1();
 	void RefGoToView(PPC *nppc);
-
-	int runCameraPath(int currFile);
 };
 
 extern Scene *scene;

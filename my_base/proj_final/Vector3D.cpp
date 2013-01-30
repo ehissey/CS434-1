@@ -173,3 +173,9 @@ void Vector3D::absolute(){
 		coords[i] = abs(coords[i]);
 	}
 }
+
+void Vector3D::copy(Vector3D a){
+	coords[0] = a.coords[0];
+	coords[1] = a.coords[1];
+	coords[2] = a.coords[2];
+}

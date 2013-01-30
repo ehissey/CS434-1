@@ -9,32 +9,11 @@ void GUI::cb_DBG(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_DBG_i(o,v);
 }
 
-void GUI::cb_Open_i(Fl_Button*, void*) {
-  openTIFF_cb();
-}
-void GUI::cb_Open(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Open_i(o,v);
-}
-
 void GUI::cb_Quit_i(Fl_Button*, void*) {
   quit_cb();
 }
 void GUI::cb_Quit(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Quit_i(o,v);
-}
-
-void GUI::cb_Write_i(Fl_Button*, void*) {
-  writeTIFF_cb();
-}
-void GUI::cb_Write(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Write_i(o,v);
-}
-
-void GUI::cb_Find_i(Fl_Button*, void*) {
-  findEdges_cb();
-}
-void GUI::cb_Find(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Find_i(o,v);
 }
 
 void GUI::cb_Pan_i(Fl_Button*, void*) {
@@ -135,26 +114,6 @@ void GUI::cb_Zoom1(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Zoom1_i(o,v);
 }
 
-Fl_Menu_Item GUI::menu_objectChoice[] = {
- {"Cube", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"teapot1K", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"teapot57K", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"happy2", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"happy4", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"terrain", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"DNA", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"auditorium", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Tex Subwoofer", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0}
-};
-
-void GUI::cb_Load_i(Fl_Button*, void*) {
-  loadObject_cb();
-}
-void GUI::cb_Load(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Load_i(o,v);
-}
-
 void GUI::cb_Rot_i(Fl_Button*, void*) {
   rotObjX_cb();
 }
@@ -197,18 +156,18 @@ void GUI::cb_Save(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Save_i(o,v);
 }
 
-void GUI::cb_Load1_i(Fl_Button*, void*) {
+void GUI::cb_Load_i(Fl_Button*, void*) {
   loadCam1_cb();
+}
+void GUI::cb_Load(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Load_i(o,v);
+}
+
+void GUI::cb_Load1_i(Fl_Button*, void*) {
+  loadCam2_cb();
 }
 void GUI::cb_Load1(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Load1_i(o,v);
-}
-
-void GUI::cb_Load2_i(Fl_Button*, void*) {
-  loadCam2_cb();
-}
-void GUI::cb_Load2(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Load2_i(o,v);
 }
 
 void GUI::cb_Save1_i(Fl_Button*, void*) {
@@ -300,20 +259,6 @@ void GUI::cb_Set1_i(Fl_Button*, void*) {
 }
 void GUI::cb_Set1(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Set1_i(o,v);
-}
-
-void GUI::cb_Tex_i(Fl_Button*, void*) {
-  texRepetition_cb();
-}
-void GUI::cb_Tex(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Tex_i(o,v);
-}
-
-void GUI::cb_Tex1_i(Fl_Button*, void*) {
-  texMirror_cb();
-}
-void GUI::cb_Tex1(Fl_Button* o, void* v) {
-  ((GUI*)(o->parent()->user_data()))->cb_Tex1_i(o,v);
 }
 
 void GUI::cb_Ref_i(Fl_Button*, void*) {
@@ -460,115 +405,95 @@ void GUI::cb_Ref13(Fl_Button* o, void* v) {
 #include <stdlib.h>
 
 GUI::GUI() {
-  { uiw = new Fl_Double_Window(824, 686, "GUI");
+  { uiw = new Fl_Double_Window(824, 511, "GUI");
     uiw->user_data((void*)(this));
     uiw->align(FL_ALIGN_CENTER);
-    { Fl_Button* o = new Fl_Button(5, 640, 95, 40, "DBG");
+    { Fl_Button* o = new Fl_Button(5, 385, 95, 40, "DBG");
       o->selection_color((Fl_Color)FL_DARK_RED);
       o->callback((Fl_Callback*)cb_DBG);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 5, 95, 40, "Open TIFF");
-      o->callback((Fl_Callback*)cb_Open);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 640, 95, 40, "Quit");
+    { Fl_Button* o = new Fl_Button(105, 385, 95, 40, "Quit");
       o->callback((Fl_Callback*)cb_Quit);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 50, 95, 40, "Write TIFF");
-      o->callback((Fl_Callback*)cb_Write);
-    } // Fl_Button* o
-    { openInput = new Fl_Input(145, 5, 155, 40, "File : ");
-    } // Fl_Input* openInput
-    { writeInput = new Fl_Input(145, 50, 155, 40, "File : ");
-    } // Fl_Input* writeInput
-    { Fl_Button* o = new Fl_Button(305, 5, 95, 45, "Find Edges");
-      o->callback((Fl_Callback*)cb_Find);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 295, 95, 45, "Pan Left");
+    { Fl_Button* o = new Fl_Button(5, 55, 95, 45, "Pan Left");
       o->callback((Fl_Callback*)cb_Pan);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 295, 95, 45, "Pan Right");
+    { Fl_Button* o = new Fl_Button(105, 55, 95, 45, "Pan Right");
       o->callback((Fl_Callback*)cb_Pan1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 345, 95, 45, "Tilt Left");
+    { Fl_Button* o = new Fl_Button(5, 105, 95, 45, "Tilt Left");
       o->callback((Fl_Callback*)cb_Tilt);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 345, 95, 45, "Tilt Right");
+    { Fl_Button* o = new Fl_Button(105, 105, 95, 45, "Tilt Right");
       o->callback((Fl_Callback*)cb_Tilt1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 395, 95, 45, "Roll Forward");
+    { Fl_Button* o = new Fl_Button(5, 155, 95, 45, "Roll Forward");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Roll);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 395, 95, 45, "Roll Backward");
+    { Fl_Button* o = new Fl_Button(105, 155, 95, 45, "Roll Backward");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Roll1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 295, 95, 45, "Trans Left");
+    { Fl_Button* o = new Fl_Button(205, 55, 95, 45, "Trans Left");
       o->callback((Fl_Callback*)cb_Trans);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(305, 295, 95, 45, "Trans Right");
+    { Fl_Button* o = new Fl_Button(305, 55, 95, 45, "Trans Right");
       o->callback((Fl_Callback*)cb_Trans1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 345, 95, 45, "Trans Up");
+    { Fl_Button* o = new Fl_Button(205, 105, 95, 45, "Trans Up");
       o->callback((Fl_Callback*)cb_Trans2);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(305, 345, 95, 45, "Trans Down");
+    { Fl_Button* o = new Fl_Button(305, 105, 95, 45, "Trans Down");
       o->callback((Fl_Callback*)cb_Trans3);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 395, 95, 45, "Trans Forward");
+    { Fl_Button* o = new Fl_Button(205, 155, 95, 45, "Trans Forward");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Trans4);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(305, 395, 95, 45, "Trans Backward");
+    { Fl_Button* o = new Fl_Button(305, 155, 95, 45, "Trans Backward");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Trans5);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 245, 95, 45, "Zoom In");
+    { Fl_Button* o = new Fl_Button(205, 5, 95, 45, "Zoom In");
       o->callback((Fl_Callback*)cb_Zoom);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(305, 245, 95, 45, "Zoom Out");
+    { Fl_Button* o = new Fl_Button(305, 5, 95, 45, "Zoom Out");
       o->callback((Fl_Callback*)cb_Zoom1);
     } // Fl_Button* o
-    { objectChoice = new Fl_Choice(105, 95, 95, 45);
-      objectChoice->down_box(FL_BORDER_BOX);
-      objectChoice->menu(menu_objectChoice);
-    } // Fl_Choice* objectChoice
-    { Fl_Button* o = new Fl_Button(5, 95, 95, 45, "Load Object");
-      o->callback((Fl_Callback*)cb_Load);
-    } // Fl_Button* o
-    { scaleFactor = new Fl_Input(100, 245, 100, 45, "Scale Factor");
+    { scaleFactor = new Fl_Input(100, 5, 100, 45, "Scale Factor");
     } // Fl_Input* scaleFactor
-    { Fl_Button* o = new Fl_Button(5, 445, 95, 45, "Rot Obj X");
+    { Fl_Button* o = new Fl_Button(5, 205, 95, 45, "Rot Obj X");
       o->callback((Fl_Callback*)cb_Rot);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 445, 95, 45, "Rot Obj Y");
+    { Fl_Button* o = new Fl_Button(105, 205, 95, 45, "Rot Obj Y");
       o->callback((Fl_Callback*)cb_Rot1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 445, 95, 45, "Rot Obj Z");
+    { Fl_Button* o = new Fl_Button(205, 205, 95, 45, "Rot Obj Z");
       o->callback((Fl_Callback*)cb_Rot2);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 95, 95, 45, "Wireframe On");
+    { Fl_Button* o = new Fl_Button(305, 205, 95, 45, "Wireframe On");
       o->callback((Fl_Callback*)cb_Wireframe);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(305, 95, 95, 45, "Wireframe Off");
+    { Fl_Button* o = new Fl_Button(305, 255, 95, 45, "Wireframe Off");
       o->callback((Fl_Callback*)cb_Wireframe1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 495, 95, 45, "Save Cam 1");
+    { Fl_Button* o = new Fl_Button(5, 255, 95, 45, "Save Cam 1");
       o->callback((Fl_Callback*)cb_Save);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 495, 95, 45, "Load Cam 1");
+    { Fl_Button* o = new Fl_Button(105, 255, 95, 45, "Load Cam 1");
+      o->callback((Fl_Callback*)cb_Load);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(105, 305, 95, 45, "Load Cam 2");
       o->callback((Fl_Callback*)cb_Load1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 545, 95, 45, "Load Cam 2");
-      o->callback((Fl_Callback*)cb_Load2);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(5, 545, 95, 45, "Save Cam 2");
+    { Fl_Button* o = new Fl_Button(5, 305, 95, 45, "Save Cam 2");
       o->callback((Fl_Callback*)cb_Save1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 495, 95, 45, "Go To Cam 1");
+    { Fl_Button* o = new Fl_Button(205, 255, 95, 45, "Go To Cam 1");
       o->callback((Fl_Callback*)cb_Go);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(205, 545, 95, 45, "Go To Cam 2");
+    { Fl_Button* o = new Fl_Button(205, 305, 95, 45, "Go To Cam 2");
       o->callback((Fl_Callback*)cb_Go1);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(420, 5, 95, 45, "Gouraud");
@@ -606,86 +531,80 @@ GUI::GUI() {
     } // Fl_Input* ambientInput
     { exponentInput = new Fl_Input(740, 55, 50, 40);
     } // Fl_Input* exponentInput
-    { Fl_Button* o = new Fl_Button(5, 145, 95, 45, "Tex Repetition");
-      o->callback((Fl_Callback*)cb_Tex);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 145, 95, 45, "Tex Mirror");
-      o->callback((Fl_Callback*)cb_Tex1);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(420, 295, 95, 45, "Ref Pan Left");
+    { Fl_Button* o = new Fl_Button(420, 255, 95, 45, "Ref Pan Left");
       o->callback((Fl_Callback*)cb_Ref);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(520, 295, 95, 45, "Ref Pan Right");
+    { Fl_Button* o = new Fl_Button(520, 255, 95, 45, "Ref Pan Right");
       o->callback((Fl_Callback*)cb_Ref1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(420, 345, 95, 45, "Ref Tilt Left");
+    { Fl_Button* o = new Fl_Button(420, 305, 95, 45, "Ref Tilt Left");
       o->callback((Fl_Callback*)cb_Ref2);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(520, 345, 95, 45, "Ref Tilt Right");
+    { Fl_Button* o = new Fl_Button(520, 305, 95, 45, "Ref Tilt Right");
       o->callback((Fl_Callback*)cb_Ref3);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(420, 395, 95, 45, "Ref Roll Forward");
+    { Fl_Button* o = new Fl_Button(420, 355, 95, 45, "Ref Roll Forward");
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Ref4);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(520, 395, 95, 45, "Ref Roll Backward");
+    { Fl_Button* o = new Fl_Button(520, 355, 95, 45, "Ref Roll Backward");
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Ref5);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 295, 95, 45, "Ref Trans Left");
+    { Fl_Button* o = new Fl_Button(620, 255, 95, 45, "Ref Trans Left");
       o->labelsize(13);
       o->callback((Fl_Callback*)cb_Ref6);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(720, 295, 95, 45, "Ref Trans Right");
+    { Fl_Button* o = new Fl_Button(720, 255, 95, 45, "Ref Trans Right");
       o->labelsize(13);
       o->callback((Fl_Callback*)cb_Ref7);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 345, 95, 45, "Ref Trans Up");
+    { Fl_Button* o = new Fl_Button(620, 305, 95, 45, "Ref Trans Up");
       o->callback((Fl_Callback*)cb_Ref8);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(720, 345, 95, 45, "Ref Trans Down");
+    { Fl_Button* o = new Fl_Button(720, 305, 95, 45, "Ref Trans Down");
       o->labelsize(13);
       o->callback((Fl_Callback*)cb_Ref9);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 395, 95, 45, "Ref Trans Forward");
+    { Fl_Button* o = new Fl_Button(620, 355, 95, 45, "Ref Trans Forward");
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Refa);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(720, 395, 95, 45, "Ref Trans Backward");
+    { Fl_Button* o = new Fl_Button(720, 355, 95, 45, "Ref Trans Backward");
       o->labelsize(10);
       o->callback((Fl_Callback*)cb_Refb);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 245, 95, 45, "Ref Zoom In");
+    { Fl_Button* o = new Fl_Button(620, 205, 95, 45, "Ref Zoom In");
       o->callback((Fl_Callback*)cb_Refc);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(720, 245, 95, 45, "Ref Zoom Out");
+    { Fl_Button* o = new Fl_Button(720, 205, 95, 45, "Ref Zoom Out");
       o->callback((Fl_Callback*)cb_Refd);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 445, 95, 45, "Ref Go To Cam 1");
+    { Fl_Button* o = new Fl_Button(620, 405, 95, 45, "Ref Go To Cam 1");
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Refe);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(620, 495, 95, 45, "Ref Go To Cam 2");
+    { Fl_Button* o = new Fl_Button(620, 455, 95, 45, "Ref Go To Cam 2");
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Reff);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(420, 445, 95, 45, "Ref Save Cam 1");
+    { Fl_Button* o = new Fl_Button(420, 405, 95, 45, "Ref Save Cam 1");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Ref10);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(520, 445, 95, 45, "Ref Load Cam 1");
+    { Fl_Button* o = new Fl_Button(520, 405, 95, 45, "Ref Load Cam 1");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Ref11);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(520, 495, 95, 45, "Ref Load Cam 2");
+    { Fl_Button* o = new Fl_Button(520, 455, 95, 45, "Ref Load Cam 2");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Ref12);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(420, 495, 95, 45, "Ref Save Cam 2");
+    { Fl_Button* o = new Fl_Button(420, 455, 95, 45, "Ref Save Cam 2");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Ref13);
     } // Fl_Button* o
-    { refScaleFactor = new Fl_Input(515, 245, 100, 45, "Ref Scale Factor");
+    { refScaleFactor = new Fl_Input(515, 205, 100, 45, "Ref Scale Factor");
       refScaleFactor->labelsize(12);
     } // Fl_Input* refScaleFactor
     uiw->end();
@@ -705,20 +624,8 @@ void GUI::DBG_cb() {
   scene->DBG();
 }
 
-void GUI::openTIFF_cb() {
-  scene->openTIFF(openInput->value());
-}
-
 void GUI::quit_cb() {
   scene->quit();
-}
-
-void GUI::writeTIFF_cb() {
-  scene->writeTIFF(writeInput->value());
-}
-
-void GUI::findEdges_cb() {
-  scene->FindEdges();
 }
 
 void GUI::panLeft_cb() {
@@ -779,10 +686,6 @@ void GUI::transForward_cb() {
 void GUI::transBackward_cb() {
   scene->ppc->Translate('b', atof(scaleFactor->value()));
   scene->Render();
-}
-
-void GUI::loadObject_cb() {
-  scene->loadObject(menu_objectChoice[objectChoice->value()].label());
 }
 
 void GUI::zoomIn_cb() {
@@ -882,14 +785,6 @@ void GUI::setAmbient_cb() {
 
 void GUI::setExponent_cb() {
   scene->setExponent(exponentInput->value());
-}
-
-void GUI::texRepetition_cb() {
-  scene->setTexRepetition();
-}
-
-void GUI::texMirror_cb() {
-  scene->setTexMirror();
 }
 
 void GUI::refPanLeft_cb() {

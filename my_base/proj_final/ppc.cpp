@@ -282,3 +282,15 @@ void PPC::RenderImageFrameGL() {
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 }
+
+void PPC::copy(PPC *p){
+	a.copy(p->a);
+	b.copy(p->b);
+	c.copy(p->c);
+	C.copy(p->C);
+	w = p->w;
+	h = p->h;
+	zNear = p->zNear;
+	zFar = p->zFar;
+	pMat.copy(p->pMat);
+}

@@ -32,9 +32,7 @@ Scene::Scene(){
 
 	gui = new GUI();
 	gui->show();
-	gui->uiw->position(w+20+20, 50);
-
-	
+	gui->uiw->position(w + u0 + 30, v0);
 
 	hwFB = new FrameBuffer(u0, v0, w, h);
 	hwFB->label("HW Framebuffer");
@@ -50,30 +48,19 @@ Scene::Scene(){
 	ppc = new PPC(hfov, w, h);
 	
 	InitializeHWObjects();
-	DI = new DepthImage(diffuseObjectHandle);
-	if(DI){
+
+	DI = new DepthImage(hwFB, ppc, diffuseObjectHandle, 513, 512);
+	/*if(DI){
 		if(!DI->rendered){
 			DI->frame->show();
 			DI->frame->redraw();
 		}
-	}
+	}*/
+	Fl::flush();
 
-	if(!hwFB){
-		fb = new FrameBuffer(u0,v0,w,h);
-		fb->label("FrameBuffer");
-		fb->show();
+	hwFB->isDI = false;
+	DI->rendered = true;
 
-		InitializeSWObjects();
-	}
-
-	/*refPPC = new PPC(hfov, w, h);
-	refFB = new FrameBuffer(u0*15, v0*10, w, h);
-	refFB->isRef = true;
-	refFB->isHW = true;
-	refFB->label("Ref Frembuffer");
-	refFB->show();
-	settingRefMatrix = false;
-	RefLoadView0();*/
 	refPPC = 0;
 	refFB = 0;
 
@@ -82,70 +69,7 @@ Scene::Scene(){
 	Render();
 
 	cout << "here" << endl;
-	Fl::check();
-}
-
-void Scene::InitializeSWObjects(){
-	Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
-	float sl = 256.0;
-
-	//pl = new PointLight(Vector3D(0.0f, 0.0f, -70.0f));
-	//pl->enabled = false;
-	pl = 0;
-
-	currObject = new TMesh();
-
-	currObject->Load("geometry/teapot57k.bin");
-
-	AABB aabb = currObject->GetAABB();
-	float size0 = (aabb.corners[1]-aabb.corners[0]).length();
-	Vector3D tcenter = currObject->GetCenter();
-	currObject->Translate(tcenter*-1.0f+center);
-	float size1 = 170.0;
-	currObject->ScaleAboutCenter(size1/size0);
-	currObject->kamb = 0.20f;
-	currObject->gouraud = false;
-	currObject->phong = false;
-	currObject->phongExp = 40.0f;
-	currObject->enableShader = false;
-	currObject->textured = false;
-	currObject->envmapReflection = true;
-	TMList.push_back(*currObject);
-	currGuiObject = currObject;
-
-	//env = new Envmap();
-	env = 0;
-	
-
-	//ppc->Translate('f', 170.0f);
-	//ppc->Roll(90.0f);
-	//ppc->Translate('b', 2.5f);
-	//ppc->Pan(180.0f);
-
-
-	//currGuiObject->Rotate(currGuiObject->GetCenter(), ppc->a, -90.0f);
-	//currGuiObject->Rotate(currGuiObject->GetCenter(), ppc->b*-1, 180.0f);
-
-	//ppc->Pan(90.0f);
-	//ppc->Translate('b', 170.0f);
-	//ppc->Translate('r', 170.0f);
-
-	//cout << ppc->GetVD() << endl;
-}
-
-void Scene::FrameSetup(){
-	if(!env){
-		fb->Set(0xFFFFFFFF);
-	}else{
-		for(int v = 0; v < fb->h; v++){
-			for(int u = 0; u < fb->w; u++){
-				Vector3D dir = ((ppc->c + ppc->a*((float)u+0.5f) + ppc->b*((float)v+0.5f))).normalize();
-				unsigned int col = env->getColor(dir);
-				fb->Set(u,v,col);
-			}
-		}
-	}
-	fb->SetZB(0.0f);
+	//Fl::check();
 }
 
 void Scene::Render(){
@@ -153,274 +77,12 @@ void Scene::Render(){
 		i->wireframe = wireframe;
 	}
 	
+	
+
 	if(hwFB){
-		if(refPPC && refFB){
-			refFB->redraw();
-		}
-		hwFB->redraw();
+		//hwFB->redraw();
 	}
 	return;
-	//SW Rendering
-	FrameSetup();
-	if(refPPC && refFB){
-		currObject->projTextured = false;
-		refFB->Set(0xFFFFFFFF);
-		refFB->SetZB(0.0f);
-		currObject->Render(refPPC, refFB, pl, wireframe, env);
-		currObject->projTextured = true;
-	}
-		
-	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
-		i->Render(ppc, fb, pl, wireframe, env);
-	}
-
-	if(pl){
-		if(pl->enabled == true){
-			pl->Visualize(ppc, fb);
-		}
-	}
-
-	fb->redraw();
-
-	if(refPPC && refFB){
-		refFB->redraw();
-	}
-}
-
-void Scene::DBG(){
-	int currFile = 0;
-
-	//writeTIFF("REFERENCE.TIFF", refFB);
-
-	for(int i = 0; i < 360; i++){
-		currGuiObject->Rotate(currGuiObject->GetCenter(), ppc->b * -1.0f, 1.0f);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	PPC ppc2(*ppc);
-	ppc2.Load("mydbg/view1.txt");
-	PPC oppc(*ppc);
-
-	int n = 360;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc, &ppc2, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	return;
-	
-	//int currFile = 300;
-	
-	PPC ppcNew(*ppc);
-	ppcNew.Pan(90.0f);
-	ppcNew.Translate('b', 170.0f);
-	ppcNew.Translate('r', 170.0f);
-
-	//PPC oppc(*ppc);
-	//int n = 75;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc, &ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppcNew.Pan(90.0f);
-	ppcNew.Translate('b', 170.0f);
-	ppcNew.Translate('r', 170.0f);
-
-	PPC oppc2(*ppc);
-	n = 75;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc2, &ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppcNew.Pan(90.0f);
-	ppcNew.Translate('b', 170.0f);
-	ppcNew.Translate('r', 170.0f);
-
-	PPC oppc3(*ppc);
-	n = 75;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc3, &ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppcNew.Pan(90.0f);
-	ppcNew.Translate('b', 170.0f);
-	ppcNew.Translate('r', 170.0f);
-
-	PPC oppc4(*ppc);
-	n = 75;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc4, &ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-	
-	return;
-	
-	writeTIFF("envmap/front.tiff", hwFB);
-	ppc->Save("envmap/front.txt");
-	ppc->Pan(90.0f);
-	Render();
-	Fl::check();
-	writeTIFF("envmap/left.tiff", hwFB);
-	ppc->Save("envmap/left.txt");
-	ppc->Pan(90.0f);
-	Render();
-	Fl::check();
-	writeTIFF("envmap/back.tiff", hwFB);
-	ppc->Save("envmap/back.txt");
-	ppc->Pan(90.0f);
-	Render();
-	Fl::check();
-	writeTIFF("envmap/right.tiff", hwFB);
-	ppc->Save("envmap/right.txt");
-	ppc->Pan(90.0f);
-	ppc->Roll(90.0f);
-	Render();
-	Fl::check();
-	writeTIFF("envmap/top.tiff", hwFB);
-	ppc->Save("envmap/top.txt");
-	ppc->Roll(180.0f);
-	Render();
-	Fl::check();
-	writeTIFF("envmap/bottom.tiff", hwFB);
-	ppc->Save("envmap/bottom.txt");
-
-	return;
-}
-
-int Scene::runCameraPath(int currFile){
-	PPC * ppcNew = new PPC();
-
-	ppc->Load("mydbg/view0_demo.txt");
-	ppcNew->Load("mydbg/view1_demo.txt");
-
-	PPC oppc(*ppc);
-	int n = 90;
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc, ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppc->Load("mydbg/view1_demo.txt");
-	ppcNew->Load("mydbg/view2_demo.txt");
-
-	PPC oppc2(*ppc);
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc2, ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppc->Load("mydbg/view2_demo.txt");
-	ppcNew->Load("mydbg/view3_demo.txt");
-
-	PPC oppc3(*ppc);
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc3, ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppc->Load("mydbg/view3_demo.txt");
-	ppcNew->Load("mydbg/view4_demo.txt");
-
-	PPC oppc4(*ppc);
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc4, ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	ppc->Load("mydbg/view4_demo.txt");
-	ppcNew->Load("mydbg/view0_demo.txt");
-
-	PPC oppc5(*ppc);
-	for (int i = 0; i < n; i++) {
-		float frac = (float) i / (float) (n-1);
-		*ppc = ppc->Interpolate(&oppc5, ppcNew, frac);
-		Render();
-
-		writeCurrFrame(currFile, hwFB);
-		currFile++;
-
-		Fl::check();
-	}
-
-	
-
-	delete ppcNew;
-
-	return currFile;
-}
-
-void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
-	stringstream filename;
-	if(currFrame < 10){
-		filename << "frames/00" << currFrame << ".tiff";
-	}else if(currFrame < 100){
-		filename << "frames/0" << currFrame << ".tiff";
-	}else{
-		filename << "frames/" << currFrame << ".tiff";
-	}
-	//writeTIFF(filename.str(), frame);
 }
 
 void Scene::InitializeHW(){
@@ -477,10 +139,6 @@ void Scene::InitializeHW(){
 	}
 
 	delete texs;
-
-	if(env){
-		
-	}
 }
 
 void Scene::InitializeHWObjects(){
@@ -565,32 +223,6 @@ void Scene::RenderHW(){
 	}
 }
 
-void Scene::RenderRefHW(){
-	//OpenGL Setup
-	if(!initializedHW){
-		env = 0;
-		InitializeHW();
-		InitializeHWObjects();
-		initializedHW = true;
-	}
-	
-	//Frame Setup
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//Set View
-	//Set Intrinsics
-	refPPC->SetIntrinsicsHW();
-	//Set Extrinsics
-	refPPC->SetExtrinsicsHW();
-
-	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		i->RenderHW();
-	}
-}
-
 void Scene::RenderGPU(){
 	if(!initializedHW){
 		env = new Envmap();
@@ -599,10 +231,6 @@ void Scene::RenderGPU(){
 		//env = 0;
 
 		InitializeHW();
-		//InitializeHWObjects();
-
-		//DI = new DepthImage(diffuseObjectHandle);
-
 		initializedHW = true;
 	}
 	
@@ -698,50 +326,6 @@ FrameBuffer * Scene::openTIFF_FB(string filename){
 	return fb;
 }
 
-void Scene::openTIFF(string filename){
-	TIFF *FILE;
-
-	if((FILE = TIFFOpen(filename.c_str(), "r")) == 0){
-		return;
-	}
-
-	delete(fb);
-
-	int u0 = 20;
-	int v0 = 50;
-	int w = 0;
-	int h = 0;
-
-	TIFFGetField(FILE, TIFFTAG_IMAGEWIDTH, &w);
-	TIFFGetField(FILE, TIFFTAG_IMAGELENGTH, &h);
-
-	unsigned int npix = w*h;
-	unsigned int *raster =(unsigned int *) _TIFFmalloc(npix *sizeof(unsigned int));
-
-	fb = new FrameBuffer(u0,v0,w,h);
-	fb->label(filename.c_str());
-	fb->show();
-
-	int retval = TIFFReadRGBAImage(FILE, w, h, raster);
-
-	int i = 0;
-
-	for(int u = 0; u < w; u++){
-		for(int v = 0; v < h; v++){
-			fb->Set(u,v,raster[w*(h-1-v) + u]);
-			i++;
-		}
-	}
-
-	TIFFClose(FILE);
-
-	_TIFFfree(raster);
-
-	Render();
-
-	return;
-}
-
 void Scene::writeTIFF(string filename, FrameBuffer *frame){
 	TIFF *FILE;
 	
@@ -786,134 +370,6 @@ void Scene::writeTIFF(string filename, FrameBuffer *frame){
 	if(buffer){
 		_TIFFfree(buffer);
 	}
-}
-
-void Scene::writeTIFF(string filename){
-	TIFF *FILE;
-	
-	if((FILE = TIFFOpen(filename.c_str(), "w")) == 0){
-		return;
-	}
-
-	int sampleperpixel = 4;
-
-	unsigned char *image = (unsigned char*) fb->pix;
-
-	TIFFSetField(FILE, TIFFTAG_IMAGEWIDTH, fb->w);
-	TIFFSetField(FILE, TIFFTAG_IMAGELENGTH, fb->h);
-	TIFFSetField(FILE, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);
-	TIFFSetField(FILE, TIFFTAG_BITSPERSAMPLE, 8);
-	TIFFSetField(FILE, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-	TIFFSetField(FILE, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-	TIFFSetField(FILE, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-
-	tsize_t line = sampleperpixel * fb->w; 
-
-	unsigned char *buffer = NULL;
-
-	if(TIFFScanlineSize(FILE) == line){
-		buffer = (unsigned char*) _TIFFmalloc(line);
-	}else{
-		buffer = (unsigned char*) _TIFFmalloc(TIFFScanlineSize(FILE));
-	}
-
-	TIFFSetField(FILE, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(FILE, fb->w*sampleperpixel));
-
-	for (unsigned int row = 0; row < (unsigned int)fb->h; row++)
-	{
-		memcpy(buffer, &image[(fb->h-row-1)*line], line);
-		if (TIFFWriteScanline(FILE, buffer, row, 0) < 0){
-			break;
-		}
-	}
-
-	TIFFClose(FILE);
-
-	if(buffer){
-		_TIFFfree(buffer);
-	}
-}
-
-void Scene::FindEdges(){
-	FrameBuffer *edgeMap;
-
-	int u0 = 20;
-	int v0 = 50;
-	int w = fb->w;
-	int h = fb->h;
-	edgeMap = new FrameBuffer(u0,v0,w,h);
-	edgeMap->label("Edge Map");
-
-	fb->FindEdges(edgeMap);
-
-	FrameBuffer *old = fb;
-
-	fb = edgeMap;
-
-	delete old;
-
-	fb->show();
-}
-
-void Scene::loadObject(const char * objectName){
-
-	//DISABLED
-	return;
-
-	if(strcmp(objectName, "Cube") == 0){
-		Vector3D center = Vector3D(0.0f,0.0f,-175.0f);
-		float sl = 30.0;
-
-		currObject->SetCube(center,sl);
-		pl->enabled = false;
-		currObject->gouraud = false;
-		currObject->phong = false;
-		currObject->texMirror = false;
-		currObject->texRepetition = false;
-		currObject->textured = false;
-	}else if(strcmp(objectName, "Tex Subwoofer") == 0){
-		Vector3D center = Vector3D(0.0f,0.0f,-450.0f);
-
-		currObject->SetDemoTexturedModel(center);
-		currObject->gouraud = false;
-		currObject->phong = false;
-		pl->enabled = false;
-	}else{
-		Vector3D center = Vector3D(0.0f,0.0f,-175.0f);
-
-		stringstream filename;
-		char * objN = (char *) malloc((strlen(objectName)+1)*sizeof(char));
-		strcpy(objN,objectName);
-		filename << "geometry/" << objN << ".bin";
-		char * finalName = (char *) malloc((strlen(objectName)+1)*sizeof(char));
-		strcpy(finalName,filename.str().c_str());
-		
-		currObject->Load(finalName);
-
-		AABB aabb = currObject->GetAABB();
-		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
-		Vector3D tcenter = currObject->GetCenter();
-		currObject->Translate(tcenter*-1.0f+center);
-		float size1 = 170.0;
-		currObject->ScaleAboutCenter(size1/size0);
-
-		pl->enabled = false;
-
-		if(pl->enabled == true){
-			currObject->kamb = 0.20f;
-			currObject->gouraud = true;
-			currObject->phong = false;
-			currObject->phongExp = 40.0f;
-		}
-
-		currObject->texMirror = false;
-		currObject->texRepetition = false;
-		currObject->textured = false;
-
-	}
-
-	cout << "Rendering..." << endl;
-	Render();
 }
 
 void Scene::quit(){
@@ -1039,55 +495,6 @@ void Scene::setExponent(const char * input){
 	Render();
 }
 
-void Scene::setTexRepetition(){
-	if(currObject->textured){
-		currObject->texMirror = false;
-		currObject->texRepetition = true;
-
-		Render();
-	}
-}
-
-
-void Scene::setTexMirror(){
-	if(currObject->textured){
-		currObject->texMirror = true;
-		currObject->texRepetition = false;
-
-		Render();
-	}
-}
-
-void Scene::ProjectiveTextureMappingSetup(){
-	if(refPPC){
-		delete refPPC;
-		delete refFB;
-	}
-
-	refFB = new FrameBuffer(20, fb->h+50+30, 512, 512);
-
-	refPPC = new PPC(*ppc);
-	refPPC->w = refFB->w;
-	refPPC->h = refFB->h;
-	float hfovR = 45.0f / 180.0f * PI;
-	refPPC->c = (ppc->GetVD().normalize()*(float)refPPC->w/(2.0f*tanf(hfovR/2.0f))) + ppc->a.normalize() * -refPPC->w/2.0f - ppc->b.normalize() * refPPC->h/2.0f;
-
-	currObject->projTextured = false;
-	refFB->Set(0xFFFFFFFF);
-	refFB->SetZB(0.0f);
-	currObject->Render(refPPC, refFB, pl, wireframe, env);
-	//currObject->projTextured = true;
-
-	refFB->label("Reference Image");
-	refFB->show();
-
-	RefSaveView0();
-
-	currObject->projPPC = refPPC;
-	currObject->projTM = refFB;
-	currObject->projTextured = true;
-}
-
 void Scene::RefGoToView0(){
 	if(refPPC){
 		PPC nppc;
@@ -1141,121 +548,121 @@ void Scene::RefGoToView(PPC *nppc){
 	}
 }
 
-void Scene::SetGLDemoTexturedModel(Vector3D center){
-	int tN = 6;
-	int dx = 32;
-	int dy = 50;
-	int dz = 50;
-	TMesh **GLDemoTexturedModel = new TMesh*[tN];
+void Scene::DBG(){
+	int currFile = 0;
 
-	for(int i = 0; i < tN; i++){
-		GLDemoTexturedModel[i] = new TMesh();
+	//writeTIFF("REFERENCE.TIFF", refFB);
 
-		//Initializations
-		GLDemoTexturedModel[i]->textured = true;
-		GLDemoTexturedModel[i]->vertsN = 4;
-		GLDemoTexturedModel[i]->trisN = 2;
-		GLDemoTexturedModel[i]->verts = new Vector3D[GLDemoTexturedModel[i]->vertsN];
-		GLDemoTexturedModel[i]->tris = new unsigned int[GLDemoTexturedModel[i]->trisN];
-		GLDemoTexturedModel[i]->st = new Vector3D[GLDemoTexturedModel[i]->vertsN];
-		GLDemoTexturedModel[i]->st_2D = new float[GLDemoTexturedModel[i]->vertsN*2];
-		GLDemoTexturedModel[i]->cols = new Vector3D[GLDemoTexturedModel[i]->vertsN];
+	for(int i = 0; i < 360; i++){
+		currGuiObject->Rotate(currGuiObject->GetCenter(), ppc->b * -1.0f, 1.0f);
+		Render();
 
-		//Tri connections
-		int tri = 0;
-		GLDemoTexturedModel[i]->tris[3*tri+0] = 0;
-		GLDemoTexturedModel[i]->tris[3*tri+1] = 1;
-		GLDemoTexturedModel[i]->tris[3*tri+2] = 2;
-		tri++;
-		GLDemoTexturedModel[i]->tris[3*tri+0] = 2;
-		GLDemoTexturedModel[i]->tris[3*tri+1] = 3;
-		GLDemoTexturedModel[i]->tris[3*tri+2] = 0;
-		tri++;
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
 
-		//Vertex colors
-		for(int j = 0; j < GLDemoTexturedModel[i]->vertsN; j++){
-			if(j % 2 == 0){
-				GLDemoTexturedModel[i]->cols[j] = Vector3D(0.0f, 0.0f, 1.0f);
-			}else{
-				GLDemoTexturedModel[i]->cols[j] = Vector3D(1.0f, 0.0f, 0.0f);
-			}
-		}
-
-		//Tex coords
-		GLDemoTexturedModel[i]->st[0] = Vector3D(0.0f, 0.0f, 0.0f);
-		GLDemoTexturedModel[i]->st[1] = Vector3D(0.0f, 1.0f, 0.0f);
-		GLDemoTexturedModel[i]->st[2] = Vector3D(1.0f, 1.0f, 0.0f);
-		GLDemoTexturedModel[i]->st[3] = Vector3D(1.0f, 0.0f, 0.0f);
-		for(int j = 0; j < GLDemoTexturedModel[i]->vertsN; j++){
-			GLDemoTexturedModel[i]->st_2D[2*j] = GLDemoTexturedModel[i]->st[j][0];
-			GLDemoTexturedModel[i]->st_2D[2*j+1] = GLDemoTexturedModel[i]->st[j][1];
-		}
+		Fl::check();
 	}
 
-	int currTMesh = 0;
-	//Front
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(-dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(-dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["sub_front"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << "\t" << texNameToIDMap["sub_front"] << endl;
-	currTMesh++;
-	//Right
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["sub_right"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << "\t" << texNameToIDMap["sub_right"] << endl;
-	currTMesh++;
-	//Back
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(-dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(-dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["sub_back"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << endl;
-	currTMesh++;
-	//Left
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(-dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(-dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(-dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(-dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["sub_left"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << endl;
-	currTMesh++;
-	//Top
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(-dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(-dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(dx, dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(dx, dy, -dz);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["sub_top"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << endl;
-	currTMesh++;
-	//Bottom
-	GLDemoTexturedModel[currTMesh]->verts[0] = center + Vector3D(-dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->verts[1] = center + Vector3D(-dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[2] = center + Vector3D(dx, -dy, -dz);
-	GLDemoTexturedModel[currTMesh]->verts[3] = center + Vector3D(dx, -dy, dz);
-	GLDemoTexturedModel[currTMesh]->st[0] = Vector3D(0.0f, 0.0f, 0.0f);
-	GLDemoTexturedModel[currTMesh]->st[1] = Vector3D(0.0f, 4.0f, 0.0f);
-	GLDemoTexturedModel[currTMesh]->st[2] = Vector3D(4.0f, 4.0f, 0.0f);
-	GLDemoTexturedModel[currTMesh]->st[3] = Vector3D(4.0f, 0.0f, 0.0f);
-	GLDemoTexturedModel[currTMesh]->texID = texNameToIDMap["brick50"];
-	//cerr << "currTMesh: " << currTMesh << "\ttexID: " << GLDemoTexturedModel[currTMesh]->texID << endl;
-	for(int j = 0; j < GLDemoTexturedModel[currTMesh]->vertsN; j++){
-		GLDemoTexturedModel[currTMesh]->st_2D[2*j] = GLDemoTexturedModel[currTMesh]->st[j][0];
-		GLDemoTexturedModel[currTMesh]->st_2D[2*j+1] = GLDemoTexturedModel[currTMesh]->st[j][1];
+	PPC ppc2(*ppc);
+	ppc2.Load("mydbg/view1.txt");
+	PPC oppc(*ppc);
+
+	int n = 360;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc, &ppc2, frac);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
 	}
-	currTMesh++;
+
+	return;
 	
+	//int currFile = 300;
+	
+	PPC ppcNew(*ppc);
+	ppcNew.Pan(90.0f);
+	ppcNew.Translate('b', 170.0f);
+	ppcNew.Translate('r', 170.0f);
 
-	for(int i = 0; i < tN; i++){
-		TMList.push_back(*GLDemoTexturedModel[i]);
+	//PPC oppc(*ppc);
+	//int n = 75;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc, &ppcNew, frac);
+		Render();
 
-		delete GLDemoTexturedModel[i];
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
 	}
 
-	delete GLDemoTexturedModel;
+	ppcNew.Pan(90.0f);
+	ppcNew.Translate('b', 170.0f);
+	ppcNew.Translate('r', 170.0f);
+
+	PPC oppc2(*ppc);
+	n = 75;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc2, &ppcNew, frac);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+
+	ppcNew.Pan(90.0f);
+	ppcNew.Translate('b', 170.0f);
+	ppcNew.Translate('r', 170.0f);
+
+	PPC oppc3(*ppc);
+	n = 75;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc3, &ppcNew, frac);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+
+	ppcNew.Pan(90.0f);
+	ppcNew.Translate('b', 170.0f);
+	ppcNew.Translate('r', 170.0f);
+
+	PPC oppc4(*ppc);
+	n = 75;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc4, &ppcNew, frac);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+	
+	return;
+}
+
+void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
+	stringstream filename;
+	if(currFrame < 10){
+		filename << "frames/00" << currFrame << ".tiff";
+	}else if(currFrame < 100){
+		filename << "frames/0" << currFrame << ".tiff";
+	}else{
+		filename << "frames/" << currFrame << ".tiff";
+	}
+	//writeTIFF(filename.str(), frame);
 }

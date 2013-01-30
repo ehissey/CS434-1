@@ -2,7 +2,7 @@
 version 1.0110 
 header_name {.h} 
 code_name {.cxx}
-class GUI {open selected
+class GUI {open
 } {
   decl {\#include "scene.h"} {}
   decl {\#include <string>} {}
@@ -10,215 +10,147 @@ class GUI {open selected
   Function {GUI()} {open
   } {
     Fl_Window uiw {
-      label GUI open
-      xywh {630 135 824 686} type Double align 0 visible
+      label GUI open selected
+      xywh {630 135 824 511} type Double align 0 visible
     } {
       Fl_Button {} {
         label DBG
         callback {DBG_cb()}
-        xywh {5 640 95 40} selection_color 72
-      }
-      Fl_Button {} {
-        label {Open TIFF}
-        callback {openTIFF_cb()}
-        xywh {5 5 95 40}
+        xywh {5 385 95 40} selection_color 72
       }
       Fl_Button {} {
         label Quit
         callback {quit_cb()}
-        xywh {105 640 95 40}
-      }
-      Fl_Button {} {
-        label {Write TIFF}
-        callback {writeTIFF_cb()}
-        xywh {5 50 95 40}
-      }
-      Fl_Input openInput {
-        label {File : }
-        xywh {145 5 155 40}
-      }
-      Fl_Input writeInput {
-        label {File : }
-        xywh {145 50 155 40}
-      }
-      Fl_Button {} {
-        label {Find Edges}
-        callback {findEdges_cb();}
-        xywh {305 5 95 45}
+        xywh {105 385 95 40}
       }
       Fl_Button {} {
         label {Pan Left}
         callback {panLeft_cb()}
-        xywh {5 295 95 45}
+        xywh {5 55 95 45}
       }
       Fl_Button {} {
         label {Pan Right}
         callback {panRight_cb()}
-        xywh {105 295 95 45}
+        xywh {105 55 95 45}
       }
       Fl_Button {} {
         label {Tilt Left}
         callback {tiltLeft_cb()}
-        xywh {5 345 95 45}
+        xywh {5 105 95 45}
       }
       Fl_Button {} {
         label {Tilt Right}
         callback {tiltRight_cb()}
-        xywh {105 345 95 45}
+        xywh {105 105 95 45}
       }
       Fl_Button {} {
         label {Roll Forward}
         callback {rollForward_cb()}
-        xywh {5 395 95 45} labelsize 12
+        xywh {5 155 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Roll Backward}
         callback {rollBackward_cb()}
-        xywh {105 395 95 45} labelsize 12
+        xywh {105 155 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Trans Left}
         callback {transLeft_cb()}
-        xywh {205 295 95 45}
+        xywh {205 55 95 45}
       }
       Fl_Button {} {
         label {Trans Right}
         callback {transRight_cb()}
-        xywh {305 295 95 45}
+        xywh {305 55 95 45}
       }
       Fl_Button {} {
         label {Trans Up}
         callback {transUp_cb()}
-        xywh {205 345 95 45}
+        xywh {205 105 95 45}
       }
       Fl_Button {} {
         label {Trans Down}
         callback {transDown_cb()}
-        xywh {305 345 95 45}
+        xywh {305 105 95 45}
       }
       Fl_Button {} {
         label {Trans Forward}
         callback {transForward_cb()}
-        xywh {205 395 95 45} labelsize 12
+        xywh {205 155 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Trans Backward}
         callback {transBackward_cb()}
-        xywh {305 395 95 45} labelsize 12
+        xywh {305 155 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Zoom In}
         callback {zoomIn_cb()}
-        xywh {205 245 95 45}
+        xywh {205 5 95 45}
       }
       Fl_Button {} {
         label {Zoom Out}
         callback {zoomOut_cb()}
-        xywh {305 245 95 45}
-      }
-      Fl_Choice objectChoice {open
-        xywh {105 95 95 45} down_box BORDER_BOX
-      } {
-        MenuItem {} {
-          label Cube
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label teapot1K
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label teapot57K
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label happy2
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label happy4
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label terrain
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label DNA
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label auditorium
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label {Tex Subwoofer}
-          xywh {0 0 100 20}
-        }
-      }
-      Fl_Button {} {
-        label {Load Object}
-        callback {loadObject_cb()}
-        xywh {5 95 95 45}
+        xywh {305 5 95 45}
       }
       Fl_Input scaleFactor {
         label {Scale Factor}
-        xywh {100 245 100 45}
+        xywh {100 5 100 45}
       }
       Fl_Button {} {
         label {Rot Obj X}
         callback {rotObjX_cb()}
-        xywh {5 445 95 45}
+        xywh {5 205 95 45}
       }
       Fl_Button {} {
         label {Rot Obj Y}
         callback {rotObjY_cb()}
-        xywh {105 445 95 45}
+        xywh {105 205 95 45}
       }
       Fl_Button {} {
         label {Rot Obj Z}
         callback {rotObjZ_cb()}
-        xywh {205 445 95 45}
+        xywh {205 205 95 45}
       }
       Fl_Button {} {
         label {Wireframe On}
         callback {wireframeOn_cb()}
-        xywh {205 95 95 45}
+        xywh {305 205 95 45}
       }
       Fl_Button {} {
         label {Wireframe Off}
         callback {wireframeOff_cb()}
-        xywh {305 95 95 45}
+        xywh {305 255 95 45}
       }
       Fl_Button {} {
         label {Save Cam 1}
         callback {saveCam1_cb()}
-        xywh {5 495 95 45}
+        xywh {5 255 95 45}
       }
       Fl_Button {} {
         label {Load Cam 1}
         callback {loadCam1_cb()}
-        xywh {105 495 95 45}
+        xywh {105 255 95 45}
       }
       Fl_Button {} {
         label {Load Cam 2}
         callback {loadCam2_cb()}
-        xywh {105 545 95 45}
+        xywh {105 305 95 45}
       }
       Fl_Button {} {
         label {Save Cam 2}
         callback {saveCam2_cb()}
-        xywh {5 545 95 45}
+        xywh {5 305 95 45}
       }
       Fl_Button {} {
         label {Go To Cam 1}
         callback {goToCam1_cb()}
-        xywh {205 495 95 45}
+        xywh {205 255 95 45}
       }
       Fl_Button {} {
         label {Go To Cam 2}
         callback {goToCam2_cb()}
-        xywh {205 545 95 45}
+        xywh {205 305 95 45}
       }
       Fl_Button {} {
         label Gouraud
@@ -277,118 +209,108 @@ class GUI {open selected
         xywh {740 55 50 40}
       }
       Fl_Button {} {
-        label {Tex Repetition}
-        callback {texRepetition_cb()}
-        xywh {5 145 95 45}
-      }
-      Fl_Button {} {
-        label {Tex Mirror}
-        callback {texMirror_cb()}
-        xywh {105 145 95 45}
-      }
-      Fl_Button {} {
         label {Ref Pan Left}
         callback {refPanLeft_cb()}
-        xywh {420 295 95 45}
+        xywh {420 255 95 45}
       }
       Fl_Button {} {
         label {Ref Pan Right}
         callback {refPanRight_cb()}
-        xywh {520 295 95 45}
+        xywh {520 255 95 45}
       }
       Fl_Button {} {
         label {Ref Tilt Left}
         callback {refTiltLeft_cb()}
-        xywh {420 345 95 45}
+        xywh {420 305 95 45}
       }
       Fl_Button {} {
         label {Ref Tilt Right}
         callback {refTiltRight_cb()}
-        xywh {520 345 95 45}
+        xywh {520 305 95 45}
       }
       Fl_Button {} {
         label {Ref Roll Forward}
         callback {refRollForward_cb()}
-        xywh {420 395 95 45} labelsize 11
+        xywh {420 355 95 45} labelsize 11
       }
       Fl_Button {} {
         label {Ref Roll Backward}
         callback {refRollBackward_cb()}
-        xywh {520 395 95 45} labelsize 11
+        xywh {520 355 95 45} labelsize 11
       }
       Fl_Button {} {
         label {Ref Trans Left}
         callback {refTransLeft_cb()}
-        xywh {620 295 95 45} labelsize 13
+        xywh {620 255 95 45} labelsize 13
       }
       Fl_Button {} {
         label {Ref Trans Right}
         callback {refTransRight_cb()}
-        xywh {720 295 95 45} labelsize 13
+        xywh {720 255 95 45} labelsize 13
       }
       Fl_Button {} {
         label {Ref Trans Up}
         callback {refTransUp_cb()}
-        xywh {620 345 95 45}
+        xywh {620 305 95 45}
       }
       Fl_Button {} {
         label {Ref Trans Down}
         callback {refTransDown_cb()}
-        xywh {720 345 95 45} labelsize 13
+        xywh {720 305 95 45} labelsize 13
       }
       Fl_Button {} {
         label {Ref Trans Forward}
         callback {refTransForward_cb()}
-        xywh {620 395 95 45} labelsize 11
+        xywh {620 355 95 45} labelsize 11
       }
       Fl_Button {} {
         label {Ref Trans Backward}
         callback {refTransBackward_cb()}
-        xywh {720 395 95 45} labelsize 10
+        xywh {720 355 95 45} labelsize 10
       }
       Fl_Button {} {
         label {Ref Zoom In}
         callback {refZoomIn_cb()}
-        xywh {620 245 95 45}
+        xywh {620 205 95 45}
       }
       Fl_Button {} {
         label {Ref Zoom Out}
         callback {refZoomOut_cb()}
-        xywh {720 245 95 45}
+        xywh {720 205 95 45}
       }
       Fl_Button {} {
         label {Ref Go To Cam 1}
         callback {refGoToCam1_cb()}
-        xywh {620 445 95 45} labelsize 11
+        xywh {620 405 95 45} labelsize 11
       }
       Fl_Button {} {
         label {Ref Go To Cam 2}
         callback {refGoToCam2_cb()}
-        xywh {620 495 95 45} labelsize 11
+        xywh {620 455 95 45} labelsize 11
       }
       Fl_Button {} {
         label {Ref Save Cam 1}
         callback {refSaveCam1_cb()}
-        xywh {420 445 95 45} labelsize 12
+        xywh {420 405 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Ref Load Cam 1}
         callback {refLoadCam1_cb()}
-        xywh {520 445 95 45} labelsize 12
+        xywh {520 405 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Ref Load Cam 2}
         callback {refLoadCam2_cb()}
-        xywh {520 495 95 45} labelsize 12
+        xywh {520 455 95 45} labelsize 12
       }
       Fl_Button {} {
         label {Ref Save Cam 2}
         callback {refSaveCam2_cb()}
-        xywh {420 495 95 45} labelsize 12
+        xywh {420 455 95 45} labelsize 12
       }
       Fl_Input refScaleFactor {
         label {Ref Scale Factor}
-        xywh {515 245 100 45} labelsize 12
+        xywh {515 205 100 45} labelsize 12
       }
     }
   }
@@ -404,21 +326,9 @@ class GUI {open selected
   } {
     code {scene->DBG();} {}
   }
-  Function {openTIFF_cb()} {open
-  } {
-    code {scene->openTIFF(openInput->value());} {}
-  }
   Function {quit_cb()} {open
   } {
     code {scene->quit();} {}
-  }
-  Function {writeTIFF_cb()} {open
-  } {
-    code {scene->writeTIFF(writeInput->value());} {}
-  }
-  Function {findEdges_cb()} {open
-  } {
-    code {scene->FindEdges();} {}
   }
   Function {panLeft_cb()} {open
   } {
@@ -479,10 +389,6 @@ class GUI {open selected
   } {
     code {scene->ppc->Translate('b', atof(scaleFactor->value()));} {}
     code {scene->Render();} {}
-  }
-  Function {loadObject_cb()} {open
-  } {
-    code {scene->loadObject(menu_objectChoice[objectChoice->value()].label());} {}
   }
   Function {zoomIn_cb()} {open
   } {
@@ -582,14 +488,6 @@ class GUI {open selected
   Function {setExponent_cb()} {open
   } {
     code {scene->setExponent(exponentInput->value());} {}
-  }
-  Function {texRepetition_cb()} {open
-  } {
-    code {scene->setTexRepetition();} {}
-  }
-  Function {texMirror_cb()} {open
-  } {
-    code {scene->setTexMirror();} {}
   }
   Function {refPanLeft_cb()} {open
   } {
