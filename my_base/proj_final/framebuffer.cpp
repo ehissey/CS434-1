@@ -91,12 +91,51 @@ void FrameBuffer::draw(){
 
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
 	}else if(isDI){
-		//cout << "HERE" << endl;
-		scene->DI->renderImage();
-		/*glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, zb);
+		scene->RenderDIHW(); //Rendering only the diffuse object of the depth image
+		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, scene->DI->rgb);
 
-		glBindTexture(GL_TEXTURE_2D, scene->DI->depthTexID);
+		//SetZB(1.0f);
+
+		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, scene->DI->depths);
+
+		/*for(int i = 0; i < w*h; i++){
+			scene->DI->rgb[i] = pix[i];
+			scene->DI->depths[i] = zb[i];
+		}*/
+
+		//Set(1.0f);
+
+		/*float zmin = 1.0f;
+		float zmax = 0.0f;
+
+		for(int i = 0; i < w*h; i++){
+			if(zb[i] < zmin){
+				zmin = zb[i];
+			}
+
+			if(zb[i] > zmax){
+				zmax = zb[i];
+			}
+		}
+
+		cerr << "zmin: " << zmin << " zmax: " << zmax << endl;*/
+
+		/*for(int i = 0; i < w*h; i++){
+			if(zb[i] <= 1.0f){
+				//Vector3D v = Vector3D(0.0f, (zb[i]-zmin)/(zmax-zmin), 0.0f);
+
+				if(zb[i] == 1.0f){
+					cout << "HERE" << endl;
+					zb[i] = 1.0f;
+				}
+				Vector3D v = Vector3D(zb[i], zb[i], zb[i]);
+				pix[i] = v.GetColor();
+			}
+		}
+
+		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
+
+		/*glBindTexture(GL_TEXTURE_2D, scene->DI->depthTexID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -119,10 +158,14 @@ void FrameBuffer::draw(){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
 
-		//cout << "done" << endl;
-		scene->DI->rendered = true;*/
+		scene->DI->renderImage();
+
+		scene->RenderGPU(); //Done with depth image, render the whole scene now
+		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+
+		isDI = false; //Never render depth image again
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}
@@ -295,7 +338,7 @@ void FrameBuffer::MouseDragHandle(){
 	int mouse_dy = Fl::event_y() - mouseY;
 	mouseX = Fl::event_x();
 	mouseY = Fl::event_y();
-	cout << "dx: " << mouse_dx << "\tdy" << mouse_dy << endl;
+	//cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
 	
 	if(mouse_dx != 0){
 		scene->ppc->Pan(rs*mouse_dx);

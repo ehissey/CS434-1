@@ -38,7 +38,7 @@ Scene::Scene(){
 	hwFB->label("HW Framebuffer");
 	hwFB->isHW = true;
 	hwFB->isRef = false;
-	hwFB->show();
+	//hwFB->show();
 	cgi = new CGInterface();
 	soi = new ShaderOneInterface();
 	bemsi = new BgEnvMapShaderInterface();
@@ -49,27 +49,20 @@ Scene::Scene(){
 	
 	InitializeHWObjects();
 
+	//DI = 0;
 	DI = new DepthImage(hwFB, ppc, diffuseObjectHandle, 513, 512);
-	/*if(DI){
-		if(!DI->rendered){
-			DI->frame->show();
-			DI->frame->redraw();
-		}
-	}*/
-	Fl::flush();
 
-	hwFB->isDI = false;
-	DI->rendered = true;
+	hwFB->isDI = true;
+	hwFB->show();
 
 	refPPC = 0;
 	refFB = 0;
 
-	//DI = 0;
+	
 
 	Render();
 
 	cout << "here" << endl;
-	//Fl::check();
 }
 
 void Scene::Render(){
@@ -77,10 +70,12 @@ void Scene::Render(){
 		i->wireframe = wireframe;
 	}
 	
-	
+	//cout << ppc->GetVD() * ppc->Getf() << endl;
+	//cout << ppc->c << endl;
+	//cout << (ppc->GetVD() * ppc->Getf()).length() << endl;
 
 	if(hwFB){
-		//hwFB->redraw();
+		hwFB->redraw();
 	}
 	return;
 }
@@ -124,7 +119,6 @@ void Scene::InitializeHW(){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 		unsigned int * tempPix = texs[i]->convertPixToGLFormat();
@@ -221,6 +215,43 @@ void Scene::RenderHW(){
 		glEnable(GL_CULL_FACE);
 		i->RenderHW();
 	}
+}
+
+void Scene::RenderDIHW(){
+	//OpenGL Setup
+	if(!initializedHW){
+		//env = 0;
+		env = new Envmap();
+		env->texID = 500;
+		env->LoadHW();
+
+		InitializeHW();
+		initializedHW = true;
+	}
+	
+	//Frame Setup
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Vector3D center = diffuseObjectHandle->GetCenter();
+
+	ppc->Translate('f', -center.coords[2]);
+	ppc->Translate('r', -center.coords[0]);
+	ppc->Pan(90.0f);
+
+	//Set View
+	//Set Intrinsics
+	ppc->SetIntrinsicsHW();
+	//Set Extrinsics
+	ppc->SetExtrinsicsHW();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	diffuseObjectHandle->RenderHW();
+
+	ppc->Pan(-90.0f);
+	ppc->Translate('r', center.coords[0]);
+	ppc->Translate('f', center.coords[2]);
 }
 
 void Scene::RenderGPU(){

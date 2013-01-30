@@ -18,8 +18,8 @@ DepthImage::DepthImage(FrameBuffer * frame, PPC * ppc, TMesh * diffuseObject, in
 	
 	rendered = false;
 
-	frame->isDI = true;
-	frame->redraw();
+	//frame->isDI = true;
+	//frame->redraw();
 	//Fl::flush();
 	
 	//while(!rendered){
@@ -63,24 +63,6 @@ DepthImage::~DepthImage(){
 
 void DepthImage::renderImage(){
 	if(!rendered){
-		//object->Render(camera, frame, NULL, false, NULL);
-
-		//frame->redraw();
-
-		//Frame Setup
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//Set View
-		//Set Intrinsics
-		camera->SetIntrinsicsHW();
-		//Set Extrinsics
-		camera->SetExtrinsicsHW();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		diffuseObject->RenderHW();
-
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, rgb);
 		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, depths);
 
@@ -108,8 +90,6 @@ void DepthImage::renderImage(){
 
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb);
-
-		cout << "done" << endl;
 
 		rendered = true;
 	}

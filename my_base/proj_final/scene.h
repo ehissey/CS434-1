@@ -43,6 +43,8 @@ public:
 	void Render(); //SW & HW
 	void RenderHW(); //Fixed pipeline
 	void RenderGPU(); //Programmable pipeline
+	void RenderDIHW(); //Fixed pipeline
+	void RenderDIGPU(); //Programmable pipeline
 	void RenderRefHW(); //Fixed pipeline
 	void RenderRefGPU(); //Programmable pipeline
 	void FrameSetup();

@@ -108,7 +108,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 
 	st = new Vector3D[vertsN];
 
-	int mult = 5;
+	int mult = 1;
 
 	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
 	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
@@ -1069,7 +1069,6 @@ void TMesh::RenderHW(){
 
 	//Specify Vertices
 	glEnableClientState(GL_VERTEX_ARRAY);
-	
 	glVertexPointer(3,GL_FLOAT,0,verts);
 	
 	//Specify additional vertex attributes (eg color, normal, texture coord, etc)
