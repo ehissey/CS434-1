@@ -12,6 +12,9 @@ public:
 	int w, h;
 	float zNear, zFar;
 	Matrix3x3 pMat;
+	Vector3D n1, n2, n3, n4, f1, f2, f3, f4;
+
+
 	void SetPMat();
 
 	PPC() {};
@@ -41,4 +44,5 @@ public:
 	void RenderImageFrameGL();
 
 	void copy(PPC *p);
+	void setNearAndFarPoints();
 };

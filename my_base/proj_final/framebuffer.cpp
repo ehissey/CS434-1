@@ -35,61 +35,10 @@ void FrameBuffer::SetZB(float z0){
 void FrameBuffer::draw(){
 	if(isHW && !isRef && !isDI){
 		//scene->RenderHW(); //fixed pipeline
-		cout << "rendering" << endl;
 		scene->RenderGPU(); //programmable pipeline
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}else if(isRef && isHW && !isDI){
-		//scene->RenderRefHW(); //fixed pipeline
-		//scene->RenderRefGPU(); //programmable pipeline
-		
-		//SetZB(0.0f);
-		//Set(1.0f);
-		
-		/*glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
-
-		float zmin = 1.0f;
-		float zmax = 0.0f;
-
-		for(int i = 0; i < w*h; i++){
-			if(zb[i] < zmin){
-				zmin = zb[i];
-			}
-
-			if(zb[i] > zmax){
-				zmax = zb[i];
-			}
-		}
-
-		cerr << "zmin: " << zmin << " zmax: " << zmax << endl;
-
-		for(int i = 0; i < w*h; i++){
-			if(zb[i] != 1.0f){
-				Vector3D v = Vector3D((zb[i]-zmin)/(zmax-zmin), 0.0f, 0.0f);
-				//Vector3D v = Vector3D(1.0f, 0.0f, 0.0f);
-				//Vector3D v = Vector3D(zb[i], zb[i], zb[i]);
-				pix[i] = v.GetColor();
-			}
-		}
-
-		//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-
-		glBindTexture(GL_TEXTURE_2D, 1024);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-		//unsigned int * tempPix = convertPixToGLFormat();
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
-
-		//delete tempPix;
-
-		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
+		//nothing
 	}else if(isDI){
 		scene->RenderDIHW(); //Rendering only the diffuse object of the depth image
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, scene->DI->rgb);

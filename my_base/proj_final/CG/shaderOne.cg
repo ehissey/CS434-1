@@ -17,6 +17,8 @@ struct PixelDataOutput {
 	float4 color : COLOR0;
 };
 
+bool containedInPlane(float3 P, float t, float3 quadV0, float3 quadV1, float3 quadV2, float3 quadV3, float3 quadN);
+
 VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj) {
 	VertexDataOutput ret;
 	ret.projv = mul(modelViewProj, vdi.vertex);
@@ -54,16 +56,18 @@ PixelDataOutput FragmentMain(VertexDataOutput pdi,
 	float3 L = normalize(P0 - cameraEye); //vector to camera eye from vertex
 	float3 V = normalize(L - 2*dot(L,N0)*N0); //reflected camera eye vector at vertex
 
-	float3 quadN = normalize(cross(quadV2 - quadV1, quadV0 - quadV1)); //quad normal
-	float t = dot(quadN, quadV1 - P0)/dot(quadN,V); //parameter to scale V to intersect quad, could be negative
-	float3 P = P0 + t*V; //point of intersection with V and quad
-
 	//Depth Image
 	//todo
 
-	if(ret.color.x == -1.0f && t > 0){ //Quad
-		if(P.x >= quadV1.x && P.x <= quadV2.x && P.z >= quadV3.z && P.z <= quadV2.z){
-			float2 quadTexCoords = float2((P.x - quadV2.x)/(quadV2.x-quadV1.x), (P.z - quadV2.z)/(quadV2.z-quadV3.z)) * 5.0f;
+	if(ret.color.x == -1.0f){ //Quad
+		float3 quadN = normalize(cross(quadV2 - quadV1, quadV0 - quadV1)); //quad normal
+		float t = dot(quadN, quadV1 - P0)/dot(quadN,V); //parameter to scale V to intersect quad, could be negative
+		float3 P = P0 + t*V; //point of intersection with V and quad
+		
+		//if(t > 0 && P.x >= quadV1.x && P.x <= quadV2.x && P.z >= quadV3.z && P.z <= quadV2.z){ //hard code for rectanglular plane parallel to xz plane
+
+		if(containedInPlane(P, t, quadV0, quadV1, quadV2, quadV3, quadN)){ //Intersection with arbitrary plane
+			float2 quadTexCoords = float2((P.x - quadV1.x)/(quadV2.x-quadV1.x), (P.z - quadV3.z)/(quadV2.z-quadV3.z)) * 5.0f;
 
 			ret.color = tex2D(quadTex, quadTexCoords);
 		}
@@ -81,4 +85,22 @@ PixelDataOutput FragmentMain(VertexDataOutput pdi,
 	return ret;
 }
 
+bool containedInPlane(float3 P, float t, float3 quadV0, float3 quadV1, float3 quadV2, float3 quadV3, float3 quadN){
+	float3 cross0 = cross(quadV1 - quadV0, P - quadV0);
+	float3 cross1 = cross(quadV2 - quadV1, P - quadV1);
+	float3 cross2 = cross(quadV3 - quadV2, P - quadV2);
+	float3 cross3 = cross(quadV0 - quadV3, P - quadV3);
+	float dot0 = dot(cross0, quadN);
+	float dot1 = dot(cross1, quadN);
+	float dot2 = dot(cross2, quadN);
+	float dot3 = dot(cross3, quadN);
+
+	bool result = false;
+
+	if(t > 0 && ((dot0 < 0 && dot1 < 0 && dot2 < 0 && dot3 < 0) || (dot0 > 0 && dot1 > 0 && dot2 > 0 && dot3 > 0))){
+		result = true;
+	}
+
+	return result;
+}
 

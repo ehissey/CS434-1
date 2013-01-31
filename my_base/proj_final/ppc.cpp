@@ -294,3 +294,8 @@ void PPC::copy(PPC *p){
 	zFar = p->zFar;
 	pMat.copy(p->pMat);
 }
+
+void PPC::setNearAndFarPoints(){
+	Vector3D cNear = (c.normalize()*zNear*GetVD().length())/(c.normalize()*GetVD());
+	Vector3D cFar = (c.normalize()*zFar*GetVD().length())/(c.normalize()*GetVD());
+}

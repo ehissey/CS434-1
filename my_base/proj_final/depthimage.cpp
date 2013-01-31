@@ -17,42 +17,6 @@ DepthImage::DepthImage(FrameBuffer * frame, PPC * ppc, TMesh * diffuseObject, in
 	depths = new float[w*h];
 	
 	rendered = false;
-
-	//frame->isDI = true;
-	//frame->redraw();
-	//Fl::flush();
-	
-	//while(!rendered){
-	//	;
-	//}
-
-	//frame->isDI = false;
-
-	//system("pause");
-
-	/*frame = new FrameBuffer(u0, v0, w, h);
-	frame->label("Depth Image");
-	frame->isHW = false;
-	frame->isRef = false;
-	frame->isDI = true;*/
-	//frame->show();
-
-	/*float hfov = 65.0f;
-	camera = new PPC(hfov, w, h);
-
-	Vector3D center = object->GetCenter();
-
-	camera->Translate('f', -center.coords[2]);
-	//camera->Translate('u', center.coords[1]);
-	camera->Translate('r', -center.coords[0]);
-	camera->Pan(90.0f);
-
-	rendered = false;
-	depthTexID = 512;
-	rgbTexID = 513;
-//	frame->redraw();*/
-
-
 }
 
 DepthImage::~DepthImage(){
@@ -74,7 +38,7 @@ void DepthImage::renderImage(){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexParameterf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		//unsigned int * tempPix = convertPixToGLFormat();
 
@@ -88,7 +52,7 @@ void DepthImage::renderImage(){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexParameterf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb);
 
 		rendered = true;

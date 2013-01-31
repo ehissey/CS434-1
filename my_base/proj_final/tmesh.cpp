@@ -108,7 +108,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 
 	st = new Vector3D[vertsN];
 
-	int mult = 1;
+	int mult = 5;
 
 	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
 	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
