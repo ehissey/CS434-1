@@ -699,17 +699,17 @@ void GUI::zoomOut_cb() {
 }
 
 void GUI::rotObjX_cb() {
-  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->a, atof(scaleFactor->value()));
+  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(1.0f, 0.0f, 0.0f), atof(scaleFactor->value()));
   scene->Render();
 }
 
 void GUI::rotObjY_cb() {
-  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->b * -1.0f, atof(scaleFactor->value()));
+  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 1.0f, 0.0f), atof(scaleFactor->value()));
   scene->Render();
 }
 
 void GUI::rotObjZ_cb() {
-  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->GetVD(), atof(scaleFactor->value()));
+  scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 0.0f, 1.0f), atof(scaleFactor->value()));
   scene->Render();
 }
 

@@ -114,7 +114,7 @@ void FrameBuffer::draw(){
 		scene->RenderGPU(); //Done with depth image, render the whole scene now
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 
-		isDI = false; //Never render depth image again
+		//isDI = false; //Never render depth image again
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}

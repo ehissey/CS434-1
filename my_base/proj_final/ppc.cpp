@@ -8,13 +8,16 @@ PPC::PPC(float hfov, int _w, int _h) : w(_w), h(_h){
 	C = Vector3D(0.0f, 0.0f, 0.0f);
 	a = Vector3D(1.0f, 0.0f, 0.0f);
 	b = Vector3D(0.0f, -1.0f, 0.0f);
+	this->hfov = hfov;
 
 	float hfovR = hfov / 180.0f * PI;
 	c = Vector3D(-((float)w)/2.0f, ((float)h)/2.0f, -(float)w/(2.0f*tanf(hfovR/2.0f)));
-
-	SetPMat();
+	
 	zNear = 1.0f;
 	zFar = 10000.0f;
+
+	SetPMat();
+	setNearAndFarPoints();
 }
 
 bool PPC::Project(Vector3D P, Vector3D &projP){
@@ -77,6 +80,7 @@ void PPC::Pan(float rs){
 	c = c.rotate(b.normalize()*-1.0f, rs);
 
 	SetPMat();
+	setNearAndFarPoints();
 }
 void PPC::Roll(float rs){
 	if(rs == 0){
@@ -88,6 +92,7 @@ void PPC::Roll(float rs){
 	c = c.rotate(a.normalize(), rs);
 
 	SetPMat();
+	setNearAndFarPoints();
 }
 void PPC::Tilt(float rs){
 	if(rs == 0){
@@ -99,6 +104,7 @@ void PPC::Tilt(float rs){
 	c = c.rotate(GetVD().normalize(), rs);
 
 	SetPMat();
+	setNearAndFarPoints();
 }
 
 Vector3D PPC::GetVD(){
@@ -126,6 +132,7 @@ void PPC::zoom(float s, char S){
 	c = newc;
 
 	SetPMat();
+	setNearAndFarPoints();
 }
 
 void PPC::PositionAndOrient(Vector3D newC, Vector3D newVD, Vector3D vinUP, float newf, PPC &ppc){
@@ -140,6 +147,7 @@ void PPC::PositionAndOrient(Vector3D newC, Vector3D newVD, Vector3D vinUP, float
 	ppc.c = newVD*newf - ppc.b*(float)h/2.0f - ppc.a*(float)w/2.0f;
 
 	ppc.SetPMat();
+	setNearAndFarPoints();
 }
 
 PPC PPC::Interpolate(PPC * ppc0, PPC * ppc1, float frac){
@@ -227,6 +235,7 @@ void PPC::Load(char *fname){
 	ifs.close();
 
 	SetPMat();
+	setNearAndFarPoints();
 }
 
 void PPC::Print(){
@@ -293,9 +302,38 @@ void PPC::copy(PPC *p){
 	zNear = p->zNear;
 	zFar = p->zFar;
 	pMat.copy(p->pMat);
+	n0.copy(p->n0);
+	n1.copy(p->n1);
+	n2.copy(p->n2);
+	n3.copy(p->n3);
+	f0.copy(p->f0);
+	f1.copy(p->f1);
+	f2.copy(p->f2);
+	f3.copy(p->f3);
 }
 
 void PPC::setNearAndFarPoints(){
-	Vector3D cNear = (c.normalize()*zNear*GetVD().length())/(c.normalize()*GetVD());
-	Vector3D cFar = (c.normalize()*zFar*GetVD().length())/(c.normalize()*GetVD());
+	//Vector3D cNear = (c.normalize()*zNear*GetVD().length())/(c.normalize()*GetVD());
+	//Vector3D cFar = (c.normalize()*zFar*GetVD().length())/(c.normalize()*GetVD());
+
+	Vector3D VDNear, VDFar;
+	float wNear, wFar, hNear, hFar;
+
+	VDNear = GetVD() * zNear; //Vector from eye to center of near plane
+	VDFar = GetVD() * zFar; //Vector from eye to center of far plane
+
+	wNear = 2.0f*zNear*cos(hfov/2.0f); //width of near plane
+	wFar = 2.0f*zFar*cos(hfov/2.0f); //width of far plane
+	hNear = wNear*((float)h)/((float)w); //height of near plane
+	hFar = wFar*((float)h)/((float)w); //height of far plane
+
+	n0 = C + VDNear - (wNear/2.0f) * a.normalize(); //top left near
+	n1 = n0 + hNear * b.normalize(); //bottom left near
+	n2 = n1 + wNear * a.normalize(); //bottom right near
+	n3 = n0 + wNear * a.normalize(); //top right near
+
+	f0 = C + VDFar - (wFar/2.0f) * a.normalize(); //top left far
+	f1 = f0 + hFar * b.normalize(); //bottom left far
+	f2 = f1 + wFar * a.normalize(); //bottom right far
+	f3 = f0 + wFar * a.normalize(); //top right far
 }

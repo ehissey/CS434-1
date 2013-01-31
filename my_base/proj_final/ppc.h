@@ -10,9 +10,10 @@ class PPC{
 public:
 	Vector3D a, b, c, C;
 	int w, h;
+	float hfov;
 	float zNear, zFar;
 	Matrix3x3 pMat;
-	Vector3D n1, n2, n3, n4, f1, f2, f3, f4;
+	Vector3D n0, n1, n2, n3, f0, f1, f2, f3;
 
 
 	void SetPMat();

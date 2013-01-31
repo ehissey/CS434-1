@@ -13,6 +13,7 @@ public:
 	int rgbTexID;
 	int depthTexID;
 	bool rendered;
+	bool cameraSet;
 	int u0;
 	int v0;
 	int w;

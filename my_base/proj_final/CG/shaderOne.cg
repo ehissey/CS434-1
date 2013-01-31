@@ -67,9 +67,9 @@ PixelDataOutput FragmentMain(VertexDataOutput pdi,
 		//if(t > 0 && P.x >= quadV1.x && P.x <= quadV2.x && P.z >= quadV3.z && P.z <= quadV2.z){ //hard code for rectanglular plane parallel to xz plane
 
 		if(containedInPlane(P, t, quadV0, quadV1, quadV2, quadV3, quadN)){ //Intersection with arbitrary plane
-			float2 quadTexCoords = float2((P.x - quadV1.x)/(quadV2.x-quadV1.x), (P.z - quadV3.z)/(quadV2.z-quadV3.z)) * 5.0f;
+			float2 quadTexCoords = float2((P.x - quadV1.x)/(quadV2.x-quadV1.x), (P.z - quadV3.z)/(quadV2.z-quadV3.z)) * 1.0f;
 
-			ret.color = tex2D(quadTex, quadTexCoords);
+			ret.color = tex2D(depthImageRGB, quadTexCoords);
 		}
 	}
 

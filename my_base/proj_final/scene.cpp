@@ -235,24 +235,32 @@ void Scene::RenderDIHW(){
 
 	Vector3D center = diffuseObjectHandle->GetCenter();
 
+	if(!DI->cameraSet){
+		ppc->Translate('f', -center.coords[2]);
+		ppc->Translate('r', -center.coords[0]);
+		ppc->Pan(90.0f);
 
-	ppc->Translate('f', -center.coords[2]);
-	ppc->Translate('r', -center.coords[0]);
-	ppc->Pan(90.0f);
+		DI->camera->copy(ppc);
+
+		ppc->Pan(-90.0f);
+		ppc->Translate('r', center.coords[0]);
+		ppc->Translate('f', center.coords[2]);
+
+		DI->cameraSet = true;
+	}
+	
 
 	//Set View
 	//Set Intrinsics
-	ppc->SetIntrinsicsHW();
+	DI->camera->SetIntrinsicsHW();
 	//Set Extrinsics
-	ppc->SetExtrinsicsHW();
+	DI->camera->SetExtrinsicsHW();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	diffuseObjectHandle->RenderHW();
 
-	ppc->Pan(-90.0f);
-	ppc->Translate('r', center.coords[0]);
-	ppc->Translate('f', center.coords[2]);
+	
 }
 
 void Scene::RenderGPU(){

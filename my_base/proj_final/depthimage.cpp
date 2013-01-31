@@ -17,6 +17,7 @@ DepthImage::DepthImage(FrameBuffer * frame, PPC * ppc, TMesh * diffuseObject, in
 	depths = new float[w*h];
 	
 	rendered = false;
+	cameraSet = false;
 }
 
 DepthImage::~DepthImage(){
@@ -55,6 +56,6 @@ void DepthImage::renderImage(){
 		glTexParameterf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb);
 
-		rendered = true;
+		//rendered = true;
 	}
 }

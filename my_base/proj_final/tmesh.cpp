@@ -81,7 +81,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 	tris = new unsigned int[trisN*3];
 
 	float dx = 1000.0f;
-	float dy = -40.0f;
+	float dy = -23.0f;
 	float dz = 1000.0f;
 
 	verts[0] = center + Vector3D(-dx, dy, -dz);
@@ -108,7 +108,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 
 	st = new Vector3D[vertsN];
 
-	int mult = 5;
+	int mult = 1;
 
 	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
 	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
@@ -122,7 +122,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 		st_2D[2*i+1] = st[i][1];
 	}
 
-	texID = 8;
+	texID = 513;
 	textured = true;
 }
 

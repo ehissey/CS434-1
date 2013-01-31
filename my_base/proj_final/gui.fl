@@ -10,7 +10,7 @@ class GUI {open
   Function {GUI()} {open
   } {
     Fl_Window uiw {
-      label GUI open selected
+      label GUI open
       xywh {630 135 824 511} type Double align 0 visible
     } {
       Fl_Button {} {
@@ -402,17 +402,18 @@ class GUI {open
   }
   Function {rotObjX_cb()} {open
   } {
-    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->a, atof(scaleFactor->value()));} {}
+    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(1.0f, 0.0f, 0.0f), atof(scaleFactor->value()));} {}
     code {scene->Render();} {}
   }
   Function {rotObjY_cb()} {open
   } {
-    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->b * -1.0f, atof(scaleFactor->value()));} {}
+    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 1.0f, 0.0f), atof(scaleFactor->value()));} {}
     code {scene->Render();} {}
   }
   Function {rotObjZ_cb()} {open
   } {
-    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), scene->ppc->GetVD(), atof(scaleFactor->value()));} {}
+    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 0.0f, 1.0f), atof(scaleFactor->value()));} {selected
+    }
     code {scene->Render();} {}
   }
   Function {wireframeOn_cb()} {open
