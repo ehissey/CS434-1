@@ -112,6 +112,7 @@ void FrameBuffer::draw(){
 		scene->DI->renderImage();
 
 		scene->RenderGPU(); //Done with depth image, render the whole scene now
+		//scene->DI->camera->Print();
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 
 		//isDI = false; //Never render depth image again
@@ -313,7 +314,7 @@ void FrameBuffer::MouseWheelHandle(){
 
 void FrameBuffer::KeyboardHandle(){
 	float ts = 6.0;
-	float rs = 6.0;
+	float rs = 1.0;
 	Vector3D p0,p1;
 	int key = Fl::event_key();
 

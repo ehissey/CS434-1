@@ -33,8 +33,18 @@ class ShaderOneInterface{
 	CGparameter pixelQuadV2;
 	CGparameter pixelQuadV3;
 	CGparameter pixelQuadTex;
+	CGparameter pixelQuadTexCoordsMultiplier;
 	CGparameter pixelDepthImageZ;
 	CGparameter pixelDepthImageRGB;
+	//CGparameter pixelDepthImageFrustumPoints;
+	CGparameter pixelDIn0;
+	CGparameter pixelDIn1;
+	CGparameter pixelDIn2;
+	CGparameter pixelDIn3;
+	CGparameter pixelDIf0;
+	CGparameter pixelDIf1;
+	CGparameter pixelDIf2;
+	CGparameter pixelDIf3;
 	
 public:
 	ShaderOneInterface() {};

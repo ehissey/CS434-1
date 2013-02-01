@@ -108,12 +108,14 @@ void TMesh::setTexturedQuad(Vector3D center){
 
 	st = new Vector3D[vertsN];
 
-	int mult = 1;
+	//int mult = 1;
 
-	st[0] = mult*Vector3D(0.0f, 0.0f, 0.0f);
-	st[1] = mult*Vector3D(0.0f, 1.0f, 0.0f);
-	st[2] = mult*Vector3D(1.0f, 1.0f, 0.0f);
-	st[3] = mult*Vector3D(1.0f, 0.0f, 0.0f);
+	tCoordsMultiplier = 1.0f;
+
+	st[0] = tCoordsMultiplier*Vector3D(0.0f, 0.0f, 0.0f);
+	st[1] = tCoordsMultiplier*Vector3D(0.0f, 1.0f, 0.0f);
+	st[2] = tCoordsMultiplier*Vector3D(1.0f, 1.0f, 0.0f);
+	st[3] = tCoordsMultiplier*Vector3D(1.0f, 0.0f, 0.0f);
 
 	st_2D = new float[vertsN*2];
 
@@ -1060,6 +1062,109 @@ FrameBuffer * TMesh::openTIFF(string filename){
 	//Render();
 
 	return fb;
+}
+
+void TMesh::drawCameraFrustum(PPC * ppc){
+	vertsN = 8;
+	if(verts){
+		free(verts);
+	}
+
+	verts = new Vector3D[vertsN];
+
+	trisN = 12;
+	if(tris){
+		free(tris);
+	}
+	tris = new unsigned int[trisN*3];
+
+	/*verts[0] = ppc->frustum[0];
+	verts[1] = ppc->frustum[0];
+	verts[2] = ppc->frustum[0];
+	verts[3] = ppc->frustum[0];
+	verts[4] = ppc->frustum[0];
+	verts[5] = ppc->frustum[0];
+	verts[6] = ppc->frustum[0];
+	verts[7] = ppc->frustum[0];*/
+
+	for(int i = 0; i < 8; i++){
+		verts[i] = ppc->frustum[i];
+	}
+
+	int tri = 0;
+
+	//front
+	tris[3*tri+0] = 0;
+	tris[3*tri+1] = 1;
+	tris[3*tri+2] = 2;
+	tri++;
+	tris[3*tri+0] = 2;
+	tris[3*tri+1] = 3;
+	tris[3*tri+2] = 0;
+	tri++;
+
+	//back
+	tris[3*tri+0] = 7;
+	tris[3*tri+1] = 6;
+	tris[3*tri+2] = 5;
+	tri++;
+	tris[3*tri+0] = 5;
+	tris[3*tri+1] = 4;
+	tris[3*tri+2] = 7;
+	tri++;
+
+	//left
+	tris[3*tri+0] = 4;
+	tris[3*tri+1] = 5;
+	tris[3*tri+2] = 1;
+	tri++;
+	tris[3*tri+0] = 1;
+	tris[3*tri+1] = 0;
+	tris[3*tri+2] = 4;
+	tri++;
+
+	//right
+	tris[3*tri+0] = 3;
+	tris[3*tri+1] = 2;
+	tris[3*tri+2] = 6;
+	tri++;
+	tris[3*tri+0] = 6;
+	tris[3*tri+1] = 7;
+	tris[3*tri+2] = 3;
+	tri++;
+
+	//top
+	tris[3*tri+0] = 4;
+	tris[3*tri+1] = 0;
+	tris[3*tri+2] = 3;
+	tri++;
+	tris[3*tri+0] = 3;
+	tris[3*tri+1] = 7;
+	tris[3*tri+2] = 4;
+	tri++;
+
+	//bottom
+	tris[3*tri+0] = 6;
+	tris[3*tri+1] = 2;
+	tris[3*tri+2] = 1;
+	tri++;
+	tris[3*tri+0] = 1;
+	tris[3*tri+1] = 5;
+	tris[3*tri+2] = 6;
+	tri++;
+
+	cols = new Vector3D[vertsN];
+
+	for(int i = 0; i < vertsN; i++){
+		cols[i] = Vector3D(0.0f, 1.0f, 0.0f);
+	}
+
+	textured = false;
+	enableShader = false;
+
+	/*for(int i = 0; i < 8; i++){
+		cout << verts[i] << endl;
+	}*/
 }
 
 void TMesh::RenderHW(){

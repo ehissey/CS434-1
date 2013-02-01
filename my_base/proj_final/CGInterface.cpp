@@ -110,8 +110,18 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 	pixelQuadV2 = cgGetNamedParameter(pixelProgram, "quadV2");
 	pixelQuadV3 = cgGetNamedParameter(pixelProgram, "quadV3");
 	pixelQuadTex = cgGetNamedParameter(pixelProgram, "quadTex");
+	pixelQuadTexCoordsMultiplier = cgGetNamedParameter(pixelProgram, "quadTexCoordsMultiplier");
 	pixelDepthImageZ = cgGetNamedParameter(pixelProgram, "depthImageZ");
-	pixelDepthImageRGB = cgGetNamedParameter(pixelProgram, "depthImageRGB");	
+	pixelDepthImageRGB = cgGetNamedParameter(pixelProgram, "depthImageRGB");
+	//pixelDepthImageFrustumPoints = cgGetNamedParameter(pixelProgram, "depthImageFrustumPoint");
+	pixelDIn0 = cgGetNamedParameter(pixelProgram, "DIn0");
+	pixelDIn1 = cgGetNamedParameter(pixelProgram, "DIn1");
+	pixelDIn2 = cgGetNamedParameter(pixelProgram, "DIn2");
+	pixelDIn3 = cgGetNamedParameter(pixelProgram, "DIn3");
+	pixelDIf0 = cgGetNamedParameter(pixelProgram, "DIf0");
+	pixelDIf1 = cgGetNamedParameter(pixelProgram, "DIf1");
+	pixelDIf2 = cgGetNamedParameter(pixelProgram, "DIf2");
+	pixelDIf3 = cgGetNamedParameter(pixelProgram, "DIf3");
 
 	return true;
 }
@@ -132,11 +142,26 @@ void ShaderOneInterface::PerFrameInit(){
 	cgGLSetParameter3fv(pixelQuadV3, (float*)&(scene->quadHandle->verts[3]));
 	cgGLSetTextureParameter(pixelQuadTex, scene->quadHandle->texID);
     cgGLEnableTextureParameter(pixelQuadTex);
+	cgGLSetParameter1f(pixelQuadTexCoordsMultiplier, (float) scene->quadHandle->tCoordsMultiplier);
 	cgGLSetTextureParameter(pixelDepthImageZ, scene->DI->depthTexID);
     cgGLEnableTextureParameter(pixelDepthImageZ);
 	cgGLSetTextureParameter(pixelDepthImageRGB, scene->DI->rgbTexID);
     cgGLEnableTextureParameter(pixelDepthImageRGB);
-	
+	cgGLSetParameter1f(pixelQuadTexCoordsMultiplier, (float) scene->quadHandle->tCoordsMultiplier);
+	//cgGLSetParameterArray3f(pixelDepthImageFrustumPoints, 0, 8, (float*)&(scene->DI->camera->frustum));
+	//cgSetArraySize(pixelDepthImageFrustumPoints, 8);
+	cgGLSetParameter3fv(pixelDIn0, (float*)&(scene->DI->camera->frustum[0]));
+	cgGLSetParameter3fv(pixelDIn1, (float*)&(scene->DI->camera->frustum[1]));
+	cgGLSetParameter3fv(pixelDIn2, (float*)&(scene->DI->camera->frustum[2]));
+	cgGLSetParameter3fv(pixelDIn3, (float*)&(scene->DI->camera->frustum[3]));
+	cgGLSetParameter3fv(pixelDIf0, (float*)&(scene->DI->camera->frustum[4]));
+	cgGLSetParameter3fv(pixelDIf1, (float*)&(scene->DI->camera->frustum[5]));
+	cgGLSetParameter3fv(pixelDIf2, (float*)&(scene->DI->camera->frustum[6]));
+	cgGLSetParameter3fv(pixelDIf3, (float*)&(scene->DI->camera->frustum[7]));
+
+	/*for(int i = 0; i < 8; i++){
+		cout << scene->DI->camera->frustum[i] << endl;
+	}*/
 }
 
 void ShaderOneInterface::PerFrameDisable(){

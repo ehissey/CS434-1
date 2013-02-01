@@ -67,7 +67,7 @@ Scene::Scene(){
 
 void Scene::Render(){
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
-		i->wireframe = wireframe;
+		i->wireframe = wireframe || i->wireframe;
 	}
 	
 	//cout << ppc->GetVD() * ppc->Getf() << endl;
@@ -236,20 +236,22 @@ void Scene::RenderDIHW(){
 	Vector3D center = diffuseObjectHandle->GetCenter();
 
 	if(!DI->cameraSet){
-		ppc->Translate('f', -center.coords[2]);
-		ppc->Translate('r', -center.coords[0]);
-		ppc->Pan(90.0f);
-
 		DI->camera->copy(ppc);
+		DI->camera->Translate('f', 170);
+		DI->camera->Translate('r', 40);
+		DI->camera->Pan(90.0f);
+		DI->camera->zFar = 200.0f;
+		DI->camera->zNear = 1.0f;
+		DI->camera->setNearAndFarPoints();
 
-		ppc->Pan(-90.0f);
-		ppc->Translate('r', center.coords[0]);
-		ppc->Translate('f', center.coords[2]);
+		TMesh * obj = new TMesh();
+		obj->drawCameraFrustum(DI->camera);
+		obj->wireframe = true;
+		TMList.push_back(*obj);
 
 		DI->cameraSet = true;
 	}
 	
-
 	//Set View
 	//Set Intrinsics
 	DI->camera->SetIntrinsicsHW();
@@ -305,15 +307,14 @@ void Scene::RenderGPU(){
 	soi->BindPrograms();
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		
 		if(i->enableShader){
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_CULL_FACE);
 			cgi->EnableProfiles();
 			i->RenderHW();
 			cgi->DisableProfiles();
 		}else{
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_CULL_FACE);
 			i->RenderHW();
 		}
 	}

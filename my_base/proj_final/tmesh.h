@@ -18,6 +18,7 @@ public:
 	int vertsN;
 	unsigned int *tris;
 	int trisN;
+	int tCoordsMultiplier;
 	bool enabled;
 	bool wireframe;
 	float kamb, kdiff, kspec;
@@ -65,6 +66,8 @@ public:
 	void SetDemoProjTexturedModel(Vector3D center);
 
 	void setTexturedQuad(Vector3D center);
+
+	void drawCameraFrustum(PPC * ppc);
 
 	FrameBuffer *projTM;
 	PPC *projPPC;

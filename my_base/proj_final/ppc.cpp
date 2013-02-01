@@ -10,14 +10,16 @@ PPC::PPC(float hfov, int _w, int _h) : w(_w), h(_h){
 	b = Vector3D(0.0f, -1.0f, 0.0f);
 	this->hfov = hfov;
 
-	float hfovR = hfov / 180.0f * PI;
+	hfovR = hfov / 180.0f * PI;
 	c = Vector3D(-((float)w)/2.0f, ((float)h)/2.0f, -(float)w/(2.0f*tanf(hfovR/2.0f)));
 	
 	zNear = 1.0f;
 	zFar = 10000.0f;
 
+	frustum = 0;
+
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 
 bool PPC::Project(Vector3D P, Vector3D &projP){
@@ -68,6 +70,8 @@ void PPC::Translate(char dir, float ts){
 			cerr << "Invalid key" << endl;
 		}
 	}
+
+	//setNearAndFarPoints();
 }
 
 void PPC::Pan(float rs){
@@ -79,8 +83,8 @@ void PPC::Pan(float rs){
 	//b = b.rotate(b.normalize()*-1.0f, rs);
 	c = c.rotate(b.normalize()*-1.0f, rs);
 
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 void PPC::Roll(float rs){
 	if(rs == 0){
@@ -91,8 +95,8 @@ void PPC::Roll(float rs){
 	b = b.rotate(a.normalize(), rs);
 	c = c.rotate(a.normalize(), rs);
 
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 void PPC::Tilt(float rs){
 	if(rs == 0){
@@ -103,8 +107,8 @@ void PPC::Tilt(float rs){
 	b = b.rotate(GetVD().normalize(), rs);
 	c = c.rotate(GetVD().normalize(), rs);
 
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 
 Vector3D PPC::GetVD(){
@@ -131,8 +135,8 @@ void PPC::zoom(float s, char S){
 
 	c = newc;
 
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 
 void PPC::PositionAndOrient(Vector3D newC, Vector3D newVD, Vector3D vinUP, float newf, PPC &ppc){
@@ -146,8 +150,8 @@ void PPC::PositionAndOrient(Vector3D newC, Vector3D newVD, Vector3D vinUP, float
 	ppc.b = newUp * -1.0F * b.length();
 	ppc.c = newVD*newf - ppc.b*(float)h/2.0f - ppc.a*(float)w/2.0f;
 
+	//setNearAndFarPoints();
 	ppc.SetPMat();
-	setNearAndFarPoints();
 }
 
 PPC PPC::Interpolate(PPC * ppc0, PPC * ppc1, float frac){
@@ -234,12 +238,12 @@ void PPC::Load(char *fname){
 	ifs >> C ;
 	ifs.close();
 
+	//setNearAndFarPoints();
 	SetPMat();
-	setNearAndFarPoints();
 }
 
 void PPC::Print(){
-	cout << "a: " << a << "\tb: " << b << "\tc: " << c << "\tC: " << C << endl;
+	cout << "a: " << a << "\tb: " << b << "\tc: " << c << "\tC: " << C << "\tVD: " << GetVD() << endl;
 }
 
 void PPC::SetPMat(){
@@ -302,38 +306,61 @@ void PPC::copy(PPC *p){
 	zNear = p->zNear;
 	zFar = p->zFar;
 	pMat.copy(p->pMat);
-	n0.copy(p->n0);
-	n1.copy(p->n1);
-	n2.copy(p->n2);
-	n3.copy(p->n3);
-	f0.copy(p->f0);
-	f1.copy(p->f1);
-	f2.copy(p->f2);
-	f3.copy(p->f3);
+	hfov = p->hfov;
+	hfovR = p->hfovR;
 }
 
 void PPC::setNearAndFarPoints(){
 	//Vector3D cNear = (c.normalize()*zNear*GetVD().length())/(c.normalize()*GetVD());
 	//Vector3D cFar = (c.normalize()*zFar*GetVD().length())/(c.normalize()*GetVD());
 
+	if(!frustum){
+		frustum = new Vector3D[8];
+	}
+
+	/*for(int i = 0; i < 3; i++){
+		if(abs(a[i]) < 0.000001){
+			a[i] = 0;
+		}
+		if(abs(b[i]) < 0.000001){
+			b[i] = 0;
+		}
+		if(abs(c[i]) < 0.000001){
+			c[i] = 0;
+		}
+		if(abs(C[i]) < 0.000001){
+			C[i] = 0;
+		}
+	}*/
+
 	Vector3D VDNear, VDFar;
 	float wNear, wFar, hNear, hFar;
+	Vector3D n0, n1, n2, n3, f0, f1, f2, f3;
 
 	VDNear = GetVD() * zNear; //Vector from eye to center of near plane
 	VDFar = GetVD() * zFar; //Vector from eye to center of far plane
 
-	wNear = 2.0f*zNear*cos(hfov/2.0f); //width of near plane
-	wFar = 2.0f*zFar*cos(hfov/2.0f); //width of far plane
+	wNear = 2.0f*zNear*tan(hfovR/2.0f); //width of near plane
+	wFar = 2.0f*zFar*tan(hfovR/2.0f); //width of far plane
 	hNear = wNear*((float)h)/((float)w); //height of near plane
 	hFar = wFar*((float)h)/((float)w); //height of far plane
 
-	n0 = C + VDNear - (wNear/2.0f) * a.normalize(); //top left near
+	n0 = C + VDNear - (wNear/2.0f) * a.normalize() - (hNear/2.0f) * b.normalize(); //top left near
 	n1 = n0 + hNear * b.normalize(); //bottom left near
 	n2 = n1 + wNear * a.normalize(); //bottom right near
 	n3 = n0 + wNear * a.normalize(); //top right near
 
-	f0 = C + VDFar - (wFar/2.0f) * a.normalize(); //top left far
+	f0 = C + VDFar - (wFar/2.0f) * a.normalize() - (hFar/2.0f) * b.normalize(); //top left far
 	f1 = f0 + hFar * b.normalize(); //bottom left far
 	f2 = f1 + wFar * a.normalize(); //bottom right far
 	f3 = f0 + wFar * a.normalize(); //top right far
+
+	frustum[0] = n0;
+	frustum[1] = n1;
+	frustum[2] = n2;
+	frustum[3] = n3;
+	frustum[4] = f0;
+	frustum[5] = f1;
+	frustum[6] = f2;
+	frustum[7] = f3;
 }
