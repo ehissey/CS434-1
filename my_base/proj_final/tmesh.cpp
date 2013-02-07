@@ -110,7 +110,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 
 	//int mult = 1;
 
-	tCoordsMultiplier = 1.0f;
+	tCoordsMultiplier = 5.0f;
 
 	st[0] = tCoordsMultiplier*Vector3D(0.0f, 0.0f, 0.0f);
 	st[1] = tCoordsMultiplier*Vector3D(0.0f, 1.0f, 0.0f);
@@ -124,7 +124,7 @@ void TMesh::setTexturedQuad(Vector3D center){
 		st_2D[2*i+1] = st[i][1];
 	}
 
-	texID = 513;
+	texID = 8;
 	textured = true;
 }
 
@@ -1165,6 +1165,8 @@ void TMesh::drawCameraFrustum(PPC * ppc){
 	/*for(int i = 0; i < 8; i++){
 		cout << verts[i] << endl;
 	}*/
+
+	cullFace = false;
 }
 
 void TMesh::RenderHW(){

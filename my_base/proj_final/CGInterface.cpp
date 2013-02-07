@@ -113,15 +113,9 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 	pixelQuadTexCoordsMultiplier = cgGetNamedParameter(pixelProgram, "quadTexCoordsMultiplier");
 	pixelDepthImageZ = cgGetNamedParameter(pixelProgram, "depthImageZ");
 	pixelDepthImageRGB = cgGetNamedParameter(pixelProgram, "depthImageRGB");
-	//pixelDepthImageFrustumPoints = cgGetNamedParameter(pixelProgram, "depthImageFrustumPoint");
-	pixelDIn0 = cgGetNamedParameter(pixelProgram, "DIn0");
-	pixelDIn1 = cgGetNamedParameter(pixelProgram, "DIn1");
-	pixelDIn2 = cgGetNamedParameter(pixelProgram, "DIn2");
-	pixelDIn3 = cgGetNamedParameter(pixelProgram, "DIn3");
-	pixelDIf0 = cgGetNamedParameter(pixelProgram, "DIf0");
-	pixelDIf1 = cgGetNamedParameter(pixelProgram, "DIf1");
-	pixelDIf2 = cgGetNamedParameter(pixelProgram, "DIf2");
-	pixelDIf3 = cgGetNamedParameter(pixelProgram, "DIf3");
+	pixelDepthImageFrustumPoints = cgGetNamedParameter(pixelProgram, "depthImageFrustumPoints");
+	pixelDepthImageCameraEye = cgGetNamedParameter(pixelProgram, "depthImageCameraEye");
+	pixelDepthImageModelViewProj = cgGetNamedParameter(pixelProgram, "depthImageModelViewProj");
 
 	return true;
 }
@@ -148,20 +142,14 @@ void ShaderOneInterface::PerFrameInit(){
 	cgGLSetTextureParameter(pixelDepthImageRGB, scene->DI->rgbTexID);
     cgGLEnableTextureParameter(pixelDepthImageRGB);
 	cgGLSetParameter1f(pixelQuadTexCoordsMultiplier, (float) scene->quadHandle->tCoordsMultiplier);
-	//cgGLSetParameterArray3f(pixelDepthImageFrustumPoints, 0, 8, (float*)&(scene->DI->camera->frustum));
-	//cgSetArraySize(pixelDepthImageFrustumPoints, 8);
-	cgGLSetParameter3fv(pixelDIn0, (float*)&(scene->DI->camera->frustum[0]));
-	cgGLSetParameter3fv(pixelDIn1, (float*)&(scene->DI->camera->frustum[1]));
-	cgGLSetParameter3fv(pixelDIn2, (float*)&(scene->DI->camera->frustum[2]));
-	cgGLSetParameter3fv(pixelDIn3, (float*)&(scene->DI->camera->frustum[3]));
-	cgGLSetParameter3fv(pixelDIf0, (float*)&(scene->DI->camera->frustum[4]));
-	cgGLSetParameter3fv(pixelDIf1, (float*)&(scene->DI->camera->frustum[5]));
-	cgGLSetParameter3fv(pixelDIf2, (float*)&(scene->DI->camera->frustum[6]));
-	cgGLSetParameter3fv(pixelDIf3, (float*)&(scene->DI->camera->frustum[7]));
+	cgGLSetParameterArray3f(pixelDepthImageFrustumPoints, 0, 8, (float*)(scene->DI->camera->frustum));
+	cgGLSetParameter3fv(pixelDepthImageCameraEye, (float*)&(scene->DI->camera->C));
 
-	/*for(int i = 0; i < 8; i++){
-		cout << scene->DI->camera->frustum[i] << endl;
-	}*/
+	scene->DI->camera->SetIntrinsicsHW();
+	scene->DI->camera->SetExtrinsicsHW();
+	cgGLSetStateMatrixParameter(pixelDepthImageModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	scene->ppc->SetIntrinsicsHW();
+	scene->ppc->SetExtrinsicsHW();
 }
 
 void ShaderOneInterface::PerFrameDisable(){
@@ -221,7 +209,6 @@ bool BgEnvMapShaderInterface::PerSessionInit(CGInterface *cgi){
 
 	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
 	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap" );
-	//pixelBackground = cgGetNamedParameter(pixelProgram, "background");
 
 	return true;
 }
@@ -236,7 +223,6 @@ void BgEnvMapShaderInterface::PerFrameInit(){
 	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
 	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
     cgGLEnableTextureParameter(pixelCubeMap);
-	//cgGLSetParameter1f(pixelBackground, scene->renderingBackground);
 }
 
 void BgEnvMapShaderInterface::PerFrameDisable(){

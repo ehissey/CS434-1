@@ -16,11 +16,12 @@ public:
 	Matrix3x3 pMat;
 	//Vector3D n0, n1, n2, n3, f0, f1, f2, f3;
 	Vector3D * frustum; //n0, n1, n2, n3, f0, f1, f2, f3
+	float * frustumf; //n0, n1, n2, n3, f0, f1, f2, f3
 
 
 	void SetPMat();
 
-	PPC() : frustum(0) {};
+	PPC() : frustum(0), frustumf(0) {};
 	PPC(float hfov, int _w, int _h);
 	bool Project (Vector3D P, Vector3D &projP);
 	void Translate(char dir, float ts);

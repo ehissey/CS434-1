@@ -17,6 +17,7 @@ PPC::PPC(float hfov, int _w, int _h) : w(_w), h(_h){
 	zFar = 10000.0f;
 
 	frustum = 0;
+	frustumf = 0;
 
 	//setNearAndFarPoints();
 	SetPMat();
@@ -316,6 +317,7 @@ void PPC::setNearAndFarPoints(){
 
 	if(!frustum){
 		frustum = new Vector3D[8];
+		frustumf = new float(24);
 	}
 
 	/*for(int i = 0; i < 3; i++){

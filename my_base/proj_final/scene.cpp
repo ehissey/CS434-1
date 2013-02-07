@@ -140,7 +140,7 @@ void Scene::InitializeHWObjects(){
 		float sl = 256.0;
 
 		currObject = new TMesh();
-		currObject->Load("geometry/bunny.bin");
+		currObject->Load("geometry/teapot57k.bin");
 
 		AABB aabb = currObject->GetAABB();
 		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
@@ -249,6 +249,10 @@ void Scene::RenderDIHW(){
 		obj->wireframe = true;
 		TMList.push_back(*obj);
 
+		for(int i = 0; i < 8; i++){
+			cout << i << ":\t" << DI->camera->frustum[i] << endl;
+		}
+
 		DI->cameraSet = true;
 	}
 	
@@ -261,8 +265,6 @@ void Scene::RenderDIHW(){
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	diffuseObjectHandle->RenderHW();
-
-	
 }
 
 void Scene::RenderGPU(){
@@ -308,8 +310,13 @@ void Scene::RenderGPU(){
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
 		
+		if(i->cullFace){
+			glEnable(GL_CULL_FACE);
+		}else{
+			glDisable(GL_CULL_FACE);
+		}
+
 		if(i->enableShader){
 			cgi->EnableProfiles();
 			i->RenderHW();
