@@ -23,31 +23,13 @@ void projectDepthImage(float3 depthImageCameraEye, float4x4 depthImageModelViewP
 void intersectDepths(float3 nP, float3 fP, sampler2D depthImageZ, sampler2D depthImageRGB, out float4 ret);
 float cross2(float2 a, float2 b);
 
-VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj, float sphereRadius, float sphereScaleFactor, float3 objectCenter) {
+VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj) {
 	VertexDataOutput ret;
-
-	float3 pos = vdi.vertex.xyz;
-	pos = pos - objectCenter;
-	pos = pos + sphereScaleFactor * (sphereRadius * normalize(pos) - pos);
-	pos = pos + objectCenter;
-
-	float3 realNormal = normalize(vdi.normal);
-	float3 endNormal = normalize(pos - objectCenter);
-
-	ret.projv = mul(modelViewProj, float4(pos, 1.0f));
-	ret.color = float4(vdi.color, 1.0f);
-	ret.vertex = pos;
-	//ret.normal = vdi.normal;
-	ret.normal = (1 - sphereScaleFactor) * realNormal + sphereScaleFactor * endNormal;
-	return ret;
-	
-	
-	/*VertexDataOutput ret;
 	ret.projv = mul(modelViewProj, vdi.vertex);
 	ret.color = float4(vdi.color, 1.0f);
 	ret.vertex = vdi.vertex;
 	ret.normal = vdi.normal;
-	return ret;*/
+	return ret;
 }
 
 TRIANGLE void GeometryMain(AttribArray<VertexDataOutput> tverts, uniform float4x4 modelViewProj){
@@ -234,80 +216,122 @@ void projectDepthImage(float3 depthImageCameraEye, float4x4 depthImageModelViewP
 
 	nearPproj = clamp(nearPproj, float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 1.0f));
 	farPproj = clamp(farPproj, float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 1.0f));
+
+	/*//NEAR CLAMP
+	if(nearPproj.x < 0.0f && nearPproj.x > -0.001){
+		nearPproj.x = 0.0f;
+	}else if(nearPproj.x > 1.0f && nearPproj.x < 1.001){
+		nearPproj.x = 1.0f;
+	}
+
+	if(nearPproj.y < 0.0f && nearPproj.y > -0.001){
+		nearPproj.y = 0.0f;
+	}else if(nearPproj.y > 1.0f && nearPproj.y < 1.001){
+		nearPproj.y = 1.0f;
+	}
+
+	//FAR CLAMP
+	if(farPproj.x < 0.0f && farPproj.x > -0.001){
+		farPproj.x = 0.0f;
+	}else if(farPproj.x > 1.0f && farPproj.x < 1.001){
+		farPproj.x = 1.0f;
+	}
+
+	if(farPproj.y < 0.0f && farPproj.y > -0.001){
+		farPproj.y = 0.0f;
+	}else if(farPproj.y > 1.0f && farPproj.y < 1.001){
+		farPproj.y = 1.0f;
+	}*/
 }
 
 void intersectDepths(float3 nP, float3 fP, sampler2D depthImageZ, sampler2D depthImageRGB, out float4 ret){
-	bool colorFound = false;
-	float stepsN = max(ceil(abs((nP.x - fP.x)*1280)), ceil(abs((nP.y - fP.y)*720)));
-	//float stepsN = 1000.0f;
+	float stepsN = max(ceil(abs((nP.x - fP.x)*640)), ceil(abs((nP.y - fP.y)*480)));
+	//float stepsN = 100.0f;
 	float2 s0 = nP.xy; 
 	float z0 = nP.z;
-	//s0 = clamp(s0, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
-	//z0 = clamp(z0, float(0.0f), float(1.0f));
+	s0 = clamp(s0, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+	z0 = clamp(z0, float(0.0f), float(1.0f));
 	float2 s1;
 	float z1;
 
-	float2 p0;
-	float2 q0;
-	float2 p1;
-	float2 q1;
-	float2 r;
-	float2 s;
-	float t;
+	float dx;
+	float dy;
+	float det;
 	float u;
+	float v;
+	float2 as;
+	float2 bs;
+	float2 ad;
+	float2 bd;
+
+	bool colorFound = false;
 
 	for(float i = 0.0f; i < stepsN; i++){
 		s1 = nP.xy + (fP.xy - nP.xy) * (i+1.0f)/stepsN;
 		z1 = nP.z + (fP.z - nP.z) * (i+1.0f)/stepsN;
-		s1 = clamp(s1, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
-		z1 = clamp(z1, float(0.0f), float(1.0f));
 
-		p0 = float2(0.0f, z0);
-		q0 = float2(0.0f, tex2D(depthImageZ, s0).x);
-		p1 = float2(1.0f, z1);
-		q1 = float2(1.0f, tex2D(depthImageZ, s1).x);
-		r = p1 - p0;
-		s = q1 - q0;
+		//s1 = clamp(s1, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+		//z1 = clamp(z1, float(0.0f), float(1.0f));
 
-		if(q0.y == 1.0f || q1.y == 1.0f){
+		/*if(s1.x <= 1.0f && s1.x >= 0.0f && s1.y <= 1.0f && s1.y >= 0.0f){
+			continue;
+		}*/
+
+		as = float2(0.0f, z0);
+		bs = float2(0.0f, tex2D(depthImageZ, s0).x);
+
+		ad = normalize((float2(1.0f, z1) - as));
+		bd = normalize((float2(1.0f, tex2D(depthImageZ, s1).x) - bs));
+
+		det = bd.x*ad.y - bd.y*ad.x;
+
+		if(abs(det) < 0.000001f){
 			s0 = s1;
 			z0 = z1;
-		}else if(p0.y == 1.0f || p1.y == 1.0f){
-			s0 = s1;
-			z0 = z1;
-		}else if(abs(cross2(r,s)) < 0.0000001f){
-			s0 = s1;
-			z0 = z1;
+			continue;
+		}
+
+		dx = bs.x - as.x;
+		dy = bs.y - as.y;
+
+		u = (dy*bd.x - dx*bd.y) / det;
+		v = (dy*ad.x - dx*ad.y) / det;
+
+		float k = (as + u*ad).x;
+
+		if(k >= 0.0f && k <= 1.0f){
+			if(!colorFound){
+				float2 texCoord = s0 + (s1 - s0) * k;
+				texCoord = clamp(texCoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+				ret = tex2D(depthImageRGB, texCoord);
+				//ret = float4(1.0f, 0.0f, 0.0f, 1.0f);
+				colorFound = true;
+				i = stepsN;
+			}
 		}else{
-			t = cross2((q0-p0), s) / cross2(r,s);
-			u = cross2((q0-p0), r) / cross2(r,s);
+			if(!colorFound){
+				//ret = tex2D(depthImageRGB, s0 + (s1 - s0) * k);
+				//ret = float4(0.0f, 0.0f, 1.0f, 1.0f);
+				//colorFound = true;
+			}
+		}
 
-			if((t >= 0.0f && t <= 1.0f) && (u >= 0.0f && u <= 1.0f)){
+		/*if(u >= 0.0f && v >= 0.0){
+			if(length(v*ad) <= length((float2(1.0f, z1) - as)) && 
+				length(u*bd) <= length((float2(1.0f, tex2D(depthImageZ, s1).x) - bs))){
 				if(!colorFound){
-					float k = (p0 + t * r).x;
-
-					if(k < 0.0f || k > 1.0f){
-						ret = float4(0.0f, 1.0f, 0.0f, 1.0f);
-						colorFound = true;
-					}else{
-						//ret = tex2D(depthImageRGB, s0 + (s1 - s0) * k);
-						float2 texC = s0 + (s1 - s0) * k;
-						ret = tex2D(depthImageRGB, texC);
-						colorFound = true;
-					}
-
-					//i = stepsN;
+					ret = tex2D(depthImageRGB, s0 + (s1 - s0) * (as + v*ad).x);
+					colorFound = true;
 				}
 			}
+		}*/
 
-			s0 = s1;
-			z0 = z1;
-		}
+		s0 = s1;
+		z0 = z1;
 	}
-	
+
 	if(!colorFound){
 		ret = float4(-1.0f, -1.0f, -1.0f, 1.0f);
-		//ret = float4(0.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 

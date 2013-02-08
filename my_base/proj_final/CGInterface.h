@@ -25,6 +25,9 @@ class ShaderOneInterface{
 	CGprogram pixelProgram;
 
 	CGparameter vertexModelViewProj;
+	CGparameter vertexSphereRadius;
+	CGparameter vertexSphereScaleFactor;
+	CGparameter vertexObjectCenter;
 	CGparameter geometryModelViewProj;
 	CGparameter pixelCameraEye;
 	CGparameter pixelCubeMap;
@@ -60,6 +63,25 @@ class BgEnvMapShaderInterface{
 
 public:
 	BgEnvMapShaderInterface() {};
+	bool PerSessionInit(CGInterface *cgi);
+	void BindPrograms();
+	void PerFrameInit();
+	void PerFrameDisable();
+};
+
+class diffuseBunnyShaderInterface{
+	CGprogram geometryProgram;
+	CGprogram vertexProgram;
+	CGprogram pixelProgram;
+
+	CGparameter vertexModelViewProj;
+	CGparameter vertexSphereRadius;
+	CGparameter vertexSphereScaleFactor;
+	CGparameter vertexObjectCenter;
+	CGparameter geometryModelViewProj;
+
+public:
+	diffuseBunnyShaderInterface() {};
 	bool PerSessionInit(CGInterface *cgi);
 	void BindPrograms();
 	void PerFrameInit();

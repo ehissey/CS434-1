@@ -103,6 +103,10 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
 	#endif
 
+	vertexSphereRadius = cgGetNamedParameter(vertexProgram, "sphereRadius");
+	vertexSphereScaleFactor = cgGetNamedParameter(vertexProgram, "sphereScaleFactor");
+	vertexObjectCenter = cgGetNamedParameter(vertexProgram, "objectCenter");
+
 	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
 	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap");
 	pixelQuadV0 = cgGetNamedParameter(pixelProgram, "quadV0");
@@ -127,6 +131,10 @@ void ShaderOneInterface::PerFrameInit(){
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
 	
+	cgGLSetParameter1f(vertexSphereRadius, scene->reflectiveObjectHandle->sphereMorphRaidus);
+	cgGLSetParameter1f(vertexSphereScaleFactor, scene->reflectiveObjectHandle->sphereMorphScaleFactor);
+	cgGLSetParameter3fv(vertexObjectCenter, (float *) & (scene->reflectiveObjectHandle->center));
+
 	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
 	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
     cgGLEnableTextureParameter(pixelCubeMap);
@@ -229,6 +237,79 @@ void BgEnvMapShaderInterface::PerFrameDisable(){
 }
 
 void BgEnvMapShaderInterface::BindPrograms(){
+	#ifdef GEOMETRY_SUPPORT
+		cgGLBindProgram(geometryProgram);
+	#endif
+	cgGLBindProgram(vertexProgram);
+	cgGLBindProgram(pixelProgram);
+}
+
+
+bool diffuseBunnyShaderInterface::PerSessionInit(CGInterface *cgi){
+	
+	#ifdef GEOMETRY_SUPPORT
+		geometryProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/diffuseBunnyShader.cg", cgi->geometryCGprofile, "GeometryMain", NULL);
+		if(geometryProgram == NULL) {
+			CGerror Error = cgGetError();
+			cerr << "Shader One Geometry Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+			cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+			return false;
+		}
+	#endif
+
+	vertexProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/diffuseBunnyShader.cg", cgi->vertexCGprofile, "VertexMain", NULL);
+	if(vertexProgram == NULL){
+		CGerror Error = cgGetError();
+		cerr << "Shader One Geometry Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+		cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+		return false;
+	}
+
+	pixelProgram = cgCreateProgramFromFile(cgi->cgContext, CG_SOURCE, "CG/diffuseBunnyShader.cg", cgi->pixelCGprofile, "FragmentMain", NULL);
+	if(pixelProgram == NULL) {
+		CGerror Error = cgGetError();
+		cerr << "Shader One Fragment Program COMPILE ERROR: " << cgGetErrorString(Error) << endl;
+		cerr << cgGetLastListing(cgi->cgContext) << endl << endl;
+		return false;
+	}
+
+	// load programs
+	#ifdef GEOMETRY_SUPPORT
+		cgGLLoadProgram(geometryProgram);
+	#endif
+	cgGLLoadProgram(vertexProgram);
+	cgGLLoadProgram(pixelProgram);
+
+	// build some parameters by name such that we can set them later...
+	vertexModelViewProj = cgGetNamedParameter(vertexProgram, "modelViewProj");
+	#ifdef GEOMETRY_SUPPORT
+		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
+	#endif
+
+	vertexSphereRadius = cgGetNamedParameter(vertexProgram, "sphereRadius");
+	vertexSphereScaleFactor = cgGetNamedParameter(vertexProgram, "sphereScaleFactor");
+	vertexObjectCenter = cgGetNamedParameter(vertexProgram, "objectCenter");
+
+	return true;
+}
+
+void diffuseBunnyShaderInterface::PerFrameInit(){
+	//set parameters
+	cgGLSetStateMatrixParameter(vertexModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	#ifdef GEOMETRY_SUPPORT
+		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	#endif
+	
+	cgGLSetParameter1f(vertexSphereRadius, scene->diffuseObjectHandle->sphereMorphRaidus);
+	cgGLSetParameter1f(vertexSphereScaleFactor, scene->diffuseObjectHandle->sphereMorphScaleFactor);
+	cgGLSetParameter3fv(vertexObjectCenter, (float *) & (scene->diffuseObjectHandle->center));
+
+}
+
+void diffuseBunnyShaderInterface::PerFrameDisable(){
+}
+
+void diffuseBunnyShaderInterface::BindPrograms(){
 	#ifdef GEOMETRY_SUPPORT
 		cgGLBindProgram(geometryProgram);
 	#endif

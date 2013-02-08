@@ -29,6 +29,11 @@ public:
 	float reflectiveSF;
 	bool envmapReflection;
 	bool cullFace;
+	float sphereMorphRaidus;
+	float sphereMorphScaleFactor;
+	int sphereMorphDirection;
+	int shaderSelection;
+	Vector3D center;
 
 	FrameBuffer ** texs;
 	int texsN;
@@ -41,7 +46,7 @@ public:
 	Vector3D * st;
 	float * st_2D;
 
-	TMesh() : cullFace(true), envmapReflection(false), reflectiveSF(-1.0f), enableShader(false), wireframe(false), projTextured(false), projTM(0), projPPC(0), texRepetition(false), texMirror(false), 
+	TMesh() : sphereMorphDirection(-2), shaderSelection(-1), sphereMorphScaleFactor(-1.0f), sphereMorphRaidus(-1.0f), cullFace(true), envmapReflection(false), reflectiveSF(-1.0f), enableShader(false), wireframe(false), projTextured(false), projTM(0), projPPC(0), texRepetition(false), texMirror(false), 
 		st(0), textured(false), triToTexMap(0), texs(0), texsN(0), enabled(true), 
 		kamb(0.0f), kdiff(0.0f), kspec(0.0f), gouraud(false), phong(false), phongExp(0), 
 		verts(0), vertsN(0), tris(0), trisN(0), cols(0), normals(0) {};

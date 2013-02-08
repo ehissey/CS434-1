@@ -105,5 +105,8 @@
     <None Include="CG\bgEnvMapShader.cg">
       <Filter>CG</Filter>
     </None>
+    <None Include="CG\diffuseBunnyShader.cg">
+      <Filter>CG</Filter>
+    </None>
   </ItemGroup>
 </Project>

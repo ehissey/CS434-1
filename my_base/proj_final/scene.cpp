@@ -27,8 +27,10 @@ Scene::Scene(){
 	int u0 = 20;
 	int v0 = 50;
 	int sci = 2;
-	int w = sci * 320;
-	int h = sci * 240;
+	//int w = sci * 320;
+	//int h = sci * 240;
+	int w = 1280;
+	int h = 720;
 
 	gui = new GUI();
 	gui->show();
@@ -42,6 +44,7 @@ Scene::Scene(){
 	cgi = new CGInterface();
 	soi = new ShaderOneInterface();
 	bemsi = new BgEnvMapShaderInterface();
+	dbsi = new diffuseBunnyShaderInterface();
 	//hwFB = 0;
 
 	float hfov = 45.0f;
@@ -136,11 +139,11 @@ void Scene::InitializeHW(){
 }
 
 void Scene::InitializeHWObjects(){
-		Vector3D center = Vector3D(40.0f,0.0f,-170.0f);
+		Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
 		float sl = 256.0;
 
 		currObject = new TMesh();
-		currObject->Load("geometry/teapot57k.bin");
+		currObject->Load("geometry/bunny.bin");
 
 		AABB aabb = currObject->GetAABB();
 		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
@@ -153,11 +156,17 @@ void Scene::InitializeHWObjects(){
 		currObject->phong = false;
 		currObject->phongExp = 40.0f;
 		currObject->enableShader = true;
+		currObject->shaderSelection = 1;
+		currObject->sphereMorphRaidus = 20.0f;
+		currObject->sphereMorphScaleFactor = 0.0f;
+		currObject->sphereMorphDirection = 1.0f;
+		currObject->center = center;
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
-		currGuiObject = currObject;
+		//currGuiObject = currObject;
+		reflectiveObjectHandle = currObject;
 
-		center = Vector3D(-40.0f,0.0f,-170.0f);
+		center = Vector3D(20.0f,0.0f,-150.0f);
 
 		currObject = new TMesh();
 		currObject->Load("geometry/bunny.bin");
@@ -172,7 +181,12 @@ void Scene::InitializeHWObjects(){
 		currObject->gouraud = false;
 		currObject->phong = false;
 		currObject->phongExp = 40.0f;
-		currObject->enableShader = false;
+		currObject->enableShader = true;
+		currObject->shaderSelection = 2;
+		currObject->sphereMorphRaidus = 20.0f;
+		currObject->sphereMorphScaleFactor = 0.0f;
+		currObject->sphereMorphDirection = 1.0f;
+		currObject->center = center;
 		//currObject->reflectiveSF = 0.5f;
 		TMList.push_back(*currObject);
 		currGuiObject = currObject;
@@ -228,6 +242,14 @@ void Scene::RenderDIHW(){
 		InitializeHW();
 		initializedHW = true;
 	}
+
+	if(!initializedGPU){
+		cgi->PerSessionInit();
+		soi->PerSessionInit(cgi);
+		bemsi->PerSessionInit(cgi);
+		dbsi->PerSessionInit(cgi);
+		initializedGPU = true;
+	}
 	
 	//Frame Setup
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -236,18 +258,26 @@ void Scene::RenderDIHW(){
 	Vector3D center = diffuseObjectHandle->GetCenter();
 
 	if(!DI->cameraSet){
-		DI->camera->copy(ppc);
-		DI->camera->Translate('f', 170);
-		DI->camera->Translate('r', 40);
-		DI->camera->Pan(90.0f);
-		DI->camera->zFar = 200.0f;
+		//DI->camera->copy(ppc);
+		DI->camera = new PPC(150.0f, ppc->w, ppc->h);
+		DI->camera->zFar = 100.0f;
 		DI->camera->zNear = 1.0f;
+		/*DI->camera->Translate('f', 170);
+		DI->camera->Translate('r', 40);
+		DI->camera->Pan(90.0f);*/
+
+		Vector3D center1 = Vector3D(0.0f,0.0f,-170.0f);
+		Vector3D center2 = Vector3D(20.0f,0.0f,-150.0f);
+
+		DI->camera->PositionAndOrient(center1 - (center2 - center1).normalize() * 15, (center2 - center1).normalize(), Vector3D(0.0f, 1.0f, 0.0f), DI->camera->Getf(), *(DI->camera));
+		
 		DI->camera->setNearAndFarPoints();
 
 		TMesh * obj = new TMesh();
 		obj->drawCameraFrustum(DI->camera);
 		obj->wireframe = true;
-		TMList.push_back(*obj);
+		//obj->enabled = false;
+		//TMList.push_back(*obj);
 
 		for(int i = 0; i < 8; i++){
 			cout << i << ":\t" << DI->camera->frustum[i] << endl;
@@ -262,9 +292,17 @@ void Scene::RenderDIHW(){
 	//Set Extrinsics
 	DI->camera->SetExtrinsicsHW();
 
+	dbsi->PerFrameInit();
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
+	dbsi->BindPrograms();
+	cgi->EnableProfiles();
 	diffuseObjectHandle->RenderHW();
+	cgi->DisableProfiles();
+	dbsi->PerFrameDisable();
+	
 }
 
 void Scene::RenderGPU(){
@@ -282,6 +320,7 @@ void Scene::RenderGPU(){
 		cgi->PerSessionInit();
 		soi->PerSessionInit(cgi);
 		bemsi->PerSessionInit(cgi);
+		dbsi->PerSessionInit(cgi);
 		initializedGPU = true;
 	}
 
@@ -296,8 +335,11 @@ void Scene::RenderGPU(){
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
 	
+	
+
 	soi->PerFrameInit();
 	bemsi->PerFrameInit();
+	
 
 	if(env){
 		bemsi->BindPrograms();
@@ -305,8 +347,6 @@ void Scene::RenderGPU(){
 		ppc->RenderImageFrameGL();
 		cgi->DisableProfiles();
 	}
-
-	soi->BindPrograms();
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		glEnable(GL_DEPTH_TEST);
@@ -318,6 +358,14 @@ void Scene::RenderGPU(){
 		}
 
 		if(i->enableShader){
+			if(i->shaderSelection == 1){
+				soi->BindPrograms();
+				
+			}else if(i->shaderSelection == 2){
+				
+				dbsi->PerFrameInit();
+				dbsi->BindPrograms();
+			}
 			cgi->EnableProfiles();
 			i->RenderHW();
 			cgi->DisableProfiles();
@@ -328,6 +376,7 @@ void Scene::RenderGPU(){
 
 	soi->PerFrameDisable();
 	bemsi->PerFrameDisable();
+	dbsi->PerFrameDisable();
 }
 
 void Scene::RenderRefGPU(){
@@ -597,12 +646,19 @@ void Scene::RefGoToView(PPC *nppc){
 }
 
 void Scene::DBG(){
-	int currFile = 0;
+	int currFile = 1640;
 
-	//writeTIFF("REFERENCE.TIFF", refFB);
+	for(int i = 0; i < 200; i++){
+		reflectiveObjectHandle->sphereMorphScaleFactor = reflectiveObjectHandle->sphereMorphScaleFactor + reflectiveObjectHandle->sphereMorphDirection * (1.0f/100.0f);
 
-	for(int i = 0; i < 360; i++){
-		currGuiObject->Rotate(currGuiObject->GetCenter(), ppc->b * -1.0f, 1.0f);
+		if(reflectiveObjectHandle->sphereMorphScaleFactor >= 1.0f){
+			reflectiveObjectHandle->sphereMorphScaleFactor = 1.0f;
+			reflectiveObjectHandle->sphereMorphDirection = -1.0f;
+		}else if(reflectiveObjectHandle->sphereMorphScaleFactor <= 0.0f){
+			reflectiveObjectHandle->sphereMorphScaleFactor = 0.0f;
+			reflectiveObjectHandle->sphereMorphDirection = 1.0f;
+		}
+
 		Render();
 
 		writeCurrFrame(currFile, hwFB);
@@ -611,6 +667,69 @@ void Scene::DBG(){
 		Fl::check();
 	}
 
+	reflectiveObjectHandle->sphereMorphScaleFactor = 0.0f;
+
+	Render();
+
+	Fl::check();
+
+	/*for(int i = 0; i < 200; i++){
+		diffuseObjectHandle->sphereMorphScaleFactor = diffuseObjectHandle->sphereMorphScaleFactor + diffuseObjectHandle->sphereMorphDirection * (1.0f/100.0f);
+
+		if(diffuseObjectHandle->sphereMorphScaleFactor >= 1.0f){
+			diffuseObjectHandle->sphereMorphScaleFactor = 1.0f;
+			diffuseObjectHandle->sphereMorphDirection = -1.0f;
+		}else if(diffuseObjectHandle->sphereMorphScaleFactor <= 0.0f){
+			diffuseObjectHandle->sphereMorphScaleFactor = 0.0f;
+			diffuseObjectHandle->sphereMorphDirection = 1.0f;
+		}
+
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+
+	diffuseObjectHandle->sphereMorphScaleFactor = 0.0f;
+
+	Render();
+
+	Fl::check();*/
+	
+	return;
+	
+	//int currFile = 720;
+
+	//writeTIFF("REFERENCE.TIFF", refFB);
+
+	PPC ppc2(*ppc);
+	ppc2.Load("mydbg/view1.txt");
+	PPC oppc(*ppc);
+
+	int n = 360;
+	for (int i = 0; i < n; i++) {
+		float frac = (float) i / (float) (n-1);
+		*ppc = ppc->Interpolate(&oppc, &ppc2, frac);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+
+	for(int i = 0; i < 360; i+=1){
+		currGuiObject->Rotate(currGuiObject->GetCenter(), Vector3D(0.0f, 1.0f, 0.0f), 1.0f);
+		Render();
+
+		writeCurrFrame(currFile, hwFB);
+		currFile++;
+
+		Fl::check();
+	}
+	/*
 	PPC ppc2(*ppc);
 	ppc2.Load("mydbg/view1.txt");
 	PPC oppc(*ppc);
@@ -700,7 +819,7 @@ void Scene::DBG(){
 		Fl::check();
 	}
 	
-	return;
+	return;*/
 }
 
 void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
@@ -712,5 +831,5 @@ void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
 	}else{
 		filename << "frames/" << currFrame << ".tiff";
 	}
-	//writeTIFF(filename.str(), frame);
+	writeTIFF(filename.str(), frame);
 }

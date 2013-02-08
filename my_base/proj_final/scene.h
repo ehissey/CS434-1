@@ -21,6 +21,7 @@ public:
 	CGInterface *cgi;
 	ShaderOneInterface *soi;
 	BgEnvMapShaderInterface *bemsi;
+	diffuseBunnyShaderInterface *dbsi;
 
 	GUI *gui;
 	PPC *ppc, *refPPC;
@@ -30,6 +31,7 @@ public:
 	TMesh *currGuiObject;
 	TMesh *quadHandle;
 	TMesh *diffuseObjectHandle;
+	TMesh *reflectiveObjectHandle;
 	FrameBuffer *fb, *refFB, *hwFB;
 	PointLight *pl;
 	Envmap *env;
