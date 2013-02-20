@@ -25,23 +25,7 @@ class ShaderOneInterface{
 	CGprogram pixelProgram;
 
 	CGparameter vertexModelViewProj;
-	CGparameter vertexSphereRadius;
-	CGparameter vertexSphereScaleFactor;
-	CGparameter vertexObjectCenter;
 	CGparameter geometryModelViewProj;
-	CGparameter pixelCameraEye;
-	CGparameter pixelCubeMap;
-	CGparameter pixelQuadV0;
-	CGparameter pixelQuadV1;
-	CGparameter pixelQuadV2;
-	CGparameter pixelQuadV3;
-	CGparameter pixelQuadTex;
-	CGparameter pixelQuadTexCoordsMultiplier;
-	CGparameter pixelDepthImageZ;
-	CGparameter pixelDepthImageRGB;
-	CGparameter pixelDepthImageFrustumPoints;
-	CGparameter pixelDepthImageCameraEye;
-	CGparameter pixelDepthImageModelViewProj;
 	
 public:
 	ShaderOneInterface() {};
@@ -75,9 +59,6 @@ class diffuseBunnyShaderInterface{
 	CGprogram pixelProgram;
 
 	CGparameter vertexModelViewProj;
-	CGparameter vertexSphereRadius;
-	CGparameter vertexSphereScaleFactor;
-	CGparameter vertexObjectCenter;
 	CGparameter geometryModelViewProj;
 
 public:

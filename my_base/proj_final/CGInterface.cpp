@@ -103,24 +103,6 @@ bool ShaderOneInterface::PerSessionInit(CGInterface *cgi){
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
 	#endif
 
-	vertexSphereRadius = cgGetNamedParameter(vertexProgram, "sphereRadius");
-	vertexSphereScaleFactor = cgGetNamedParameter(vertexProgram, "sphereScaleFactor");
-	vertexObjectCenter = cgGetNamedParameter(vertexProgram, "objectCenter");
-
-	pixelCameraEye = cgGetNamedParameter(pixelProgram, "cameraEye");
-	pixelCubeMap = cgGetNamedParameter(pixelProgram, "envMap");
-	pixelQuadV0 = cgGetNamedParameter(pixelProgram, "quadV0");
-	pixelQuadV1 = cgGetNamedParameter(pixelProgram, "quadV1");
-	pixelQuadV2 = cgGetNamedParameter(pixelProgram, "quadV2");
-	pixelQuadV3 = cgGetNamedParameter(pixelProgram, "quadV3");
-	pixelQuadTex = cgGetNamedParameter(pixelProgram, "quadTex");
-	pixelQuadTexCoordsMultiplier = cgGetNamedParameter(pixelProgram, "quadTexCoordsMultiplier");
-	pixelDepthImageZ = cgGetNamedParameter(pixelProgram, "depthImageZ");
-	pixelDepthImageRGB = cgGetNamedParameter(pixelProgram, "depthImageRGB");
-	pixelDepthImageFrustumPoints = cgGetNamedParameter(pixelProgram, "depthImageFrustumPoints");
-	pixelDepthImageCameraEye = cgGetNamedParameter(pixelProgram, "depthImageCameraEye");
-	pixelDepthImageModelViewProj = cgGetNamedParameter(pixelProgram, "depthImageModelViewProj");
-
 	return true;
 }
 
@@ -130,34 +112,6 @@ void ShaderOneInterface::PerFrameInit(){
 	#ifdef GEOMETRY_SUPPORT
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
-	
-	cgGLSetParameter1f(vertexSphereRadius, scene->reflectiveObjectHandle->sphereMorphRaidus);
-	cgGLSetParameter1f(vertexSphereScaleFactor, scene->reflectiveObjectHandle->sphereMorphScaleFactor);
-	cgGLSetParameter3fv(vertexObjectCenter, (float *) & (scene->reflectiveObjectHandle->center));
-
-	cgGLSetParameter3fv(pixelCameraEye, (float*)&(scene->ppc->C));
-	cgGLSetTextureParameter(pixelCubeMap, scene->env->texID);
-    cgGLEnableTextureParameter(pixelCubeMap);
-	cgGLSetParameter3fv(pixelQuadV0, (float*)&(scene->quadHandle->verts[0]));
-	cgGLSetParameter3fv(pixelQuadV1, (float*)&(scene->quadHandle->verts[1]));
-	cgGLSetParameter3fv(pixelQuadV2, (float*)&(scene->quadHandle->verts[2]));
-	cgGLSetParameter3fv(pixelQuadV3, (float*)&(scene->quadHandle->verts[3]));
-	cgGLSetTextureParameter(pixelQuadTex, scene->quadHandle->texID);
-    cgGLEnableTextureParameter(pixelQuadTex);
-	cgGLSetParameter1f(pixelQuadTexCoordsMultiplier, (float) scene->quadHandle->tCoordsMultiplier);
-	cgGLSetTextureParameter(pixelDepthImageZ, scene->DI->depthTexID);
-    cgGLEnableTextureParameter(pixelDepthImageZ);
-	cgGLSetTextureParameter(pixelDepthImageRGB, scene->DI->rgbTexID);
-    cgGLEnableTextureParameter(pixelDepthImageRGB);
-	cgGLSetParameter1f(pixelQuadTexCoordsMultiplier, (float) scene->quadHandle->tCoordsMultiplier);
-	cgGLSetParameterArray3f(pixelDepthImageFrustumPoints, 0, 8, (float*)(scene->DI->camera->frustum));
-	cgGLSetParameter3fv(pixelDepthImageCameraEye, (float*)&(scene->DI->camera->C));
-
-	scene->DI->camera->SetIntrinsicsHW();
-	scene->DI->camera->SetExtrinsicsHW();
-	cgGLSetStateMatrixParameter(pixelDepthImageModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	scene->ppc->SetIntrinsicsHW();
-	scene->ppc->SetExtrinsicsHW();
 }
 
 void ShaderOneInterface::PerFrameDisable(){
@@ -286,10 +240,6 @@ bool diffuseBunnyShaderInterface::PerSessionInit(CGInterface *cgi){
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
 	#endif
 
-	vertexSphereRadius = cgGetNamedParameter(vertexProgram, "sphereRadius");
-	vertexSphereScaleFactor = cgGetNamedParameter(vertexProgram, "sphereScaleFactor");
-	vertexObjectCenter = cgGetNamedParameter(vertexProgram, "objectCenter");
-
 	return true;
 }
 
@@ -299,10 +249,6 @@ void diffuseBunnyShaderInterface::PerFrameInit(){
 	#ifdef GEOMETRY_SUPPORT
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
-	
-	cgGLSetParameter1f(vertexSphereRadius, scene->diffuseObjectHandle->sphereMorphRaidus);
-	cgGLSetParameter1f(vertexSphereScaleFactor, scene->diffuseObjectHandle->sphereMorphScaleFactor);
-	cgGLSetParameter3fv(vertexObjectCenter, (float *) & (scene->diffuseObjectHandle->center));
 
 }
 

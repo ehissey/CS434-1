@@ -17,17 +17,12 @@ struct PixelDataOutput {
 	float4 color : COLOR0;
 };
 
-VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj, float sphereRadius, float sphereScaleFactor, float3 objectCenter) {
+VertexDataOutput VertexMain(VertexDataInput vdi, uniform float4x4 modelViewProj) {
 	VertexDataOutput ret;
 
-	float3 pos = vdi.vertex.xyz;
-	pos = pos - objectCenter;
-	pos = pos + sphereScaleFactor * (sphereRadius * normalize(pos) - pos);
-	pos = pos + objectCenter;
-
-	ret.projv = mul(modelViewProj, float4(pos, 1.0f));
+	ret.projv = mul(modelViewProj, vdi.vertex);
 	ret.color = float4(vdi.color, 1.0f);
-	ret.vertex = pos;
+	ret.vertex = vdi.vertex;
 	ret.normal = vdi.normal;
 	return ret;
 }
@@ -44,8 +39,14 @@ PixelDataOutput FragmentMain(VertexDataOutput pdi) {
 
 	PixelDataOutput ret;
 
-	ret.color = pdi.color;
-	//ret.color = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//ret.color = pdi.color;
 	
+	float4 diffuseColor = float4(0.0f, 0.2f, 0.0f, 1.0f);
+	float3 upDir = float3(0.0f, 1.0f, 0.0f);
+
+	float dotResult = dot(upDir, normalize(pdi.normal));
+
+	ret.color = diffuseColor + float4(0.0f, 0.6f, 0.0f, 0.0f) * dotResult;
+
 	return ret;
 }

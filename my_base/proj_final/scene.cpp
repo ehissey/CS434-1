@@ -52,10 +52,10 @@ Scene::Scene(){
 	
 	InitializeHWObjects();
 
-	//DI = 0;
-	DI = new DepthImage(hwFB, ppc, diffuseObjectHandle, 513, 512);
+	DI = 0;
+	//DI = new DepthImage(hwFB, ppc, diffuseObjectHandle, 513, 512);
 
-	hwFB->isDI = true;
+	hwFB->isDI = false;
 	hwFB->show();
 
 	refPPC = 0;
@@ -136,73 +136,37 @@ void Scene::InitializeHW(){
 	}
 
 	delete texs;
+
+	
 }
 
 void Scene::InitializeHWObjects(){
-		Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
-		float sl = 256.0;
+	Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
+	float sl = 256.0;
 
-		currObject = new TMesh();
-		currObject->Load("geometry/bunny.bin");
+	currObject = new TMesh();
+	currObject->Load("geometry/teapot57k.bin");
 
-		AABB aabb = currObject->GetAABB();
-		float size0 = (aabb.corners[1]-aabb.corners[0]).length();
-		Vector3D tcenter = currObject->GetCenter();
-		currObject->Translate(tcenter*-1.0f+center);
-		float size1 = 90.0f;
-		currObject->ScaleAboutCenter(size1/size0);
-		currObject->kamb = 0.20f;
-		currObject->gouraud = false;
-		currObject->phong = false;
-		currObject->phongExp = 40.0f;
-		currObject->enableShader = true;
-		currObject->shaderSelection = 1;
-		currObject->sphereMorphRaidus = 20.0f;
-		currObject->sphereMorphScaleFactor = 0.0f;
-		currObject->sphereMorphDirection = 1.0f;
-		currObject->center = center;
-		//currObject->reflectiveSF = 0.5f;
-		TMList.push_back(*currObject);
-		//currGuiObject = currObject;
-		reflectiveObjectHandle = currObject;
-
-		center = Vector3D(20.0f,0.0f,-150.0f);
-
-		currObject = new TMesh();
-		currObject->Load("geometry/bunny.bin");
-
-		aabb = currObject->GetAABB();
-		size0 = (aabb.corners[1]-aabb.corners[0]).length();
-		tcenter = currObject->GetCenter();
-		currObject->Translate(tcenter*-1.0f+center);
-		size1 = 90.0f;
-		currObject->ScaleAboutCenter(size1/size0);
-		currObject->kamb = 0.20f;
-		currObject->gouraud = false;
-		currObject->phong = false;
-		currObject->phongExp = 40.0f;
-		currObject->enableShader = true;
-		currObject->shaderSelection = 2;
-		currObject->sphereMorphRaidus = 20.0f;
-		currObject->sphereMorphScaleFactor = 0.0f;
-		currObject->sphereMorphDirection = 1.0f;
-		currObject->center = center;
-		//currObject->reflectiveSF = 0.5f;
-		TMList.push_back(*currObject);
-		currGuiObject = currObject;
-		diffuseObjectHandle = currObject;
-
-		center = Vector3D(0.0f,0.0f,-170.0f);
-
-		currObject = new TMesh();
-		currObject->setTexturedQuad(center);
-		currObject->enableShader = false;
-		TMList.push_back(*currObject);
-		quadHandle = currObject;
-		//delete currObject;
-
-		//center = Vector3D(60.0f,0.0f,-170.0f);
-		//SetGLDemoTexturedModel(center);
+	AABB aabb = currObject->GetAABB();
+	float size0 = (aabb.corners[1]-aabb.corners[0]).length();
+	Vector3D tcenter = currObject->GetCenter();
+	currObject->Translate(tcenter*-1.0f+center);
+	float size1 = 90.0f;
+	currObject->ScaleAboutCenter(size1/size0);
+	currObject->kamb = 0.20f;
+	currObject->gouraud = false;
+	currObject->phong = false;
+	currObject->phongExp = 40.0f;
+	currObject->enableShader = false;
+	currObject->shaderSelection = 2;
+	currObject->sphereMorphRaidus = 20.0f;
+	currObject->sphereMorphScaleFactor = 0.0f;
+	currObject->sphereMorphDirection = 1.0f;
+	currObject->center = center;
+	//currObject->reflectiveSF = 0.5f;
+	TMList.push_back(*currObject);
+	currGuiObject = currObject;
+	//reflectiveObjectHandle = currObject;
 }
 
 void Scene::RenderHW(){
@@ -215,7 +179,7 @@ void Scene::RenderHW(){
 	}
 	
 	//Frame Setup
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Set View
@@ -307,10 +271,10 @@ void Scene::RenderDIHW(){
 
 void Scene::RenderGPU(){
 	if(!initializedHW){
-		env = new Envmap();
+		/*env = new Envmap();
 		env->texID = 500;
-		env->LoadHW();
-		//env = 0;
+		env->LoadHW();*/
+		env = 0;
 
 		InitializeHW();
 		initializedHW = true;
@@ -325,7 +289,7 @@ void Scene::RenderGPU(){
 	}
 
 	//Frame Setup
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -335,13 +299,27 @@ void Scene::RenderGPU(){
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
 	
+
+	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	//GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat spot_direction[] = { 0.0, 0.0, -1.0 };
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 2.0);
+	//glLightf(GL_LIGHT0, GL_SPOT_EXPONENT,7.0);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+
 	
 
 	soi->PerFrameInit();
-	bemsi->PerFrameInit();
-	
 
 	if(env){
+		bemsi->PerFrameInit();
 		bemsi->BindPrograms();
 		cgi->EnableProfiles();
 		ppc->RenderImageFrameGL();
@@ -350,7 +328,10 @@ void Scene::RenderGPU(){
 
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		glEnable(GL_DEPTH_TEST);
-		
+		glShadeModel(GL_SMOOTH);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+
 		if(i->cullFace){
 			glEnable(GL_CULL_FACE);
 		}else{
