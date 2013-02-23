@@ -1,6 +1,3 @@
-#include "Vector3D.h"
-#include "ppc.h"
-#include "framebuffer.h"
 #pragma once
 #include "Vector3D.h"
 #include "ppc.h"

@@ -26,11 +26,11 @@ Scene::Scene(){
 
 	int u0 = 20;
 	int v0 = 50;
-	int sci = 2;
+	int sci = 4;
 	//int w = sci * 320;
 	//int h = sci * 240;
-	int w = 1280;
-	int h = 720;
+	int w = sci * 128;
+	int h = sci * 128;
 
 	gui = new GUI();
 	gui->show();
@@ -168,6 +168,9 @@ void Scene::InitializeHWObjects(){
 	TMList.push_back(*currObject);
 	currGuiObject = currObject;
 	//reflectiveObjectHandle = currObject;
+
+	light = new Light(128, 128, 45.0f, Vector3D(-500.0f, 0.0f, 0.0f), center, ppc);
+	ppc->PositionAndOrient(Vector3D(500.0f, 0.0f, 0.0f), (center - Vector3D(500.0f, 0.0f, 0.0f)).normalize(), Vector3D(0.0f, 1.0f, 0.0f), ppc->Getf(), *ppc);  //Look at the object
 }
 
 void Scene::RenderHW(){
@@ -300,7 +303,7 @@ void Scene::RenderGPU(){
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
 	
-
+	//OpenGL Spotlight
 	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 	//GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -315,10 +318,10 @@ void Scene::RenderGPU(){
 	//glLightf(GL_LIGHT0, GL_SPOT_EXPONENT,7.0);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 
-	GLfloat mat_specular[] = {0.3, 0.3, 0.3, 1.0};
-	GLfloat mat_shininess[] = { 10.0 };
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	//GLfloat mat_specular[] = {0.0, 0.0, 0.0, 1.0};
+	//GLfloat mat_shininess[] = { 0.0 };
+	//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	
 

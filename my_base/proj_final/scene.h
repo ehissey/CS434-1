@@ -10,6 +10,7 @@
 #include "envmap.h"
 #include "depthimage.h"
 #include "CGInterface.h"
+#include "light.h"
 
 #include <string>
 #include <list>
@@ -36,6 +37,7 @@ public:
 	PointLight *pl;
 	Envmap *env;
 	DepthImage *DI;
+	Light * light;
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;
