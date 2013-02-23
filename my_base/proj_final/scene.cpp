@@ -141,7 +141,7 @@ void Scene::InitializeHW(){
 }
 
 void Scene::InitializeHWObjects(){
-	Vector3D center = Vector3D(0.0f,0.0f,-170.0f);
+	Vector3D center = Vector3D(0.0f,0.0f,-500.0f);
 	float sl = 256.0;
 
 	currObject = new TMesh();
@@ -151,7 +151,7 @@ void Scene::InitializeHWObjects(){
 	float size0 = (aabb.corners[1]-aabb.corners[0]).length();
 	Vector3D tcenter = currObject->GetCenter();
 	currObject->Translate(tcenter*-1.0f+center);
-	float size1 = 90.0f;
+	float size1 = 400.0f;
 	currObject->ScaleAboutCenter(size1/size0);
 	currObject->kamb = 0.20f;
 	currObject->gouraud = false;
@@ -163,6 +163,7 @@ void Scene::InitializeHWObjects(){
 	currObject->sphereMorphScaleFactor = 0.0f;
 	currObject->sphereMorphDirection = 1.0f;
 	currObject->center = center;
+	//currObject->Rotate(currObject->GetCenter(), Vector3D(0.0f, 1.0f, 0.0f), 90.0f);
 	//currObject->reflectiveSF = 0.5f;
 	TMList.push_back(*currObject);
 	currGuiObject = currObject;
@@ -314,6 +315,11 @@ void Scene::RenderGPU(){
 	//glLightf(GL_LIGHT0, GL_SPOT_EXPONENT,7.0);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 
+	GLfloat mat_specular[] = {0.3, 0.3, 0.3, 1.0};
+	GLfloat mat_shininess[] = { 10.0 };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	
 
 	soi->PerFrameInit();
@@ -330,6 +336,7 @@ void Scene::RenderGPU(){
 		glEnable(GL_DEPTH_TEST);
 		glShadeModel(GL_SMOOTH);
 		glEnable(GL_LIGHTING);
+		glEnable(GL_COLOR_MATERIAL);
 		glEnable(GL_LIGHT0);
 
 		if(i->cullFace){
@@ -812,5 +819,5 @@ void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
 	}else{
 		filename << "frames/" << currFrame << ".tiff";
 	}
-	writeTIFF(filename.str(), frame);
+	//writeTIFF(filename.str(), frame);
 }

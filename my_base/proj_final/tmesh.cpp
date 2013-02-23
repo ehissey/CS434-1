@@ -806,9 +806,11 @@ void TMesh::Rotate(Vector3D dir, float theta){
 		return;
 	}
 	
-	for(int i = 0; i < vertsN; i++){
+	/*for(int i = 0; i < vertsN; i++){
 		verts[i] = verts[i].rotate(Vector3D(), dir, theta);
-	}
+	}*/
+
+	Rotate(Vector3D(), dir, theta);
 }
 
 void TMesh::Rotate(Vector3D aO, Vector3D dir, float theta){
@@ -817,7 +819,17 @@ void TMesh::Rotate(Vector3D aO, Vector3D dir, float theta){
 	}
 
 	for(int i = 0; i < vertsN; i++){
+		Vector3D temp;
+		if(normals){
+			temp = verts[i] + normals[i];
+			temp = temp.rotate(aO, dir, theta);
+		}
+
 		verts[i] = verts[i].rotate(aO, dir, theta);
+
+		if(normals){
+			normals[i] = temp - verts[i];
+		}
 	}
 }
 
@@ -926,7 +938,7 @@ void TMesh::Load(char *fname) {
   for(int i = 0; i < vertsN; i++){
 	float scale_y = (verts[i].coords[1]-min_y)/range_y;
 	float scale_z = (verts[i].coords[2]-min_z)/range_z;
-	cols[i] = Vector3D(scale_y*scale_z, 0.0f, 0.0f);
+	cols[i] = Vector3D(0.0f, scale_y*scale_z, 0.0f);
   }
 }
 
