@@ -33,6 +33,7 @@ public:
 	TMesh *quadHandle;
 	TMesh *diffuseObjectHandle;
 	TMesh *reflectiveObjectHandle;
+	TMesh *currObjectHandle;
 	FrameBuffer *fb, *refFB, *hwFB;
 	PointLight *pl;
 	Envmap *env;
@@ -88,6 +89,11 @@ public:
 	void RefSaveView1();
 	void RefLoadView1();
 	void RefGoToView(PPC *nppc);
+
+	void captureLightTransportMatrix();
+
+	GLuint fboId;
+	GLuint rboId;
 };
 
 extern Scene *scene;

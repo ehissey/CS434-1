@@ -20,6 +20,7 @@ FrameBuffer::FrameBuffer(int u0, int v0, int _w, int _h) : Fl_Gl_Window(u0, v0, 
 	isHW = false;
 	isDI = false;
 	isRef = false;
+	isLightTransport = false;
 }
 
 FrameBuffer::~FrameBuffer(){
@@ -33,89 +34,65 @@ void FrameBuffer::SetZB(float z0){
 }
 
 void FrameBuffer::draw(){
-	if(isHW && !isRef && !isDI){
-		//scene->RenderHW(); //fixed pipeline
-		scene->RenderGPU(); //programmable pipeline
+	if(isHW && !isRef && !isDI && !isLightTransport){
+		scene->RenderHW(); //fixed pipeline
+		//scene->RenderGPU(); //programmable pipeline
+		//glFlush();
+		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, scene->fboId);
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		glFlush();
+		glFinish();
 	}else if(isRef && isHW && !isDI){
 		//nothing
-	}else if(isDI){
+	}else if(isDI && !isLightTransport){
 		scene->RenderDIHW(); //Rendering only the diffuse object of the depth image
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, scene->DI->rgb);
-
-		//SetZB(1.0f);
-
 		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, scene->DI->depths);
-
-		/*for(int i = 0; i < w*h; i++){
-			scene->DI->rgb[i] = pix[i];
-			scene->DI->depths[i] = zb[i];
-		}*/
-
-		//Set(1.0f);
-
-		/*float zmin = 1.0f;
-		float zmax = 0.0f;
-
-		for(int i = 0; i < w*h; i++){
-			if(zb[i] < zmin){
-				zmin = zb[i];
-			}
-
-			if(zb[i] > zmax){
-				zmax = zb[i];
-			}
-		}
-
-		cerr << "zmin: " << zmin << " zmax: " << zmax << endl;*/
-
-		/*for(int i = 0; i < w*h; i++){
-			if(zb[i] <= 1.0f){
-				//Vector3D v = Vector3D(0.0f, (zb[i]-zmin)/(zmax-zmin), 0.0f);
-
-				if(zb[i] == 1.0f){
-					cout << "HERE" << endl;
-					zb[i] = 1.0f;
-				}
-				Vector3D v = Vector3D(zb[i], zb[i], zb[i]);
-				pix[i] = v.GetColor();
-			}
-		}
-
-		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
-
-		/*glBindTexture(GL_TEXTURE_2D, scene->DI->depthTexID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-		//unsigned int * tempPix = convertPixToGLFormat();
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, zb);
-
-		glBindTexture(GL_TEXTURE_2D, scene->DI->rgbTexID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);*/
-
 		scene->DI->renderImage();
-
 		scene->RenderGPU(); //Done with depth image, render the whole scene now
-		//scene->DI->camera->Print();
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-
 		//isDI = false; //Never render depth image again
+	}else if(isLightTransport){
+		//nothing for now, will use transport matrix and light vector to derive camera vector (rendered image) instead of calling a regular render function
+		int currLight = 0;
+		
+		for(int v = 0; v < scene->light->h; v++){
+			for(int u = 0; u < scene->light->w; u++){
+				scene->light->currLightDirection = (scene->light->lppc->c + scene->light->lppc->a * u + scene->light->lppc->a * 0.5f + scene->light->lppc->b * v + scene->light->lppc->b * 0.5f).normalize();  //Light direction relative to lppc "eye"
+			
+				scene->RenderHW();
+				glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+				glFinish();
+
+				scene->light->insertColumnIntoLightTransportMatrix(currLight, scene->hwFB);
+
+			
+				if(u == 0){
+					cerr << "Current light row: " << v << " / " << scene->light->h - 1 << endl;
+					cerr << "currLightDirection: " << scene->light->currLightDirection << endl;
+				}
+
+				currLight++;
+			}
+		}
+
+		scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/LT.tiff");
+
+		cerr << "Creating camera vector" << endl;
+		scene->light->applyLightTransportMatrixToLightVector(this);
+		//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		glFinish();
+		scene->writeTIFF("light_transport/view_from_camera.tiff", this);
+
+
+		cerr << "Begin generation of view from light" << endl;
+		scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
+		//convertPixToGLFormat();
+		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+		glFinish();
+		scene->writeTIFF("light_transport/view_from_light.tiff", this);
+		
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}

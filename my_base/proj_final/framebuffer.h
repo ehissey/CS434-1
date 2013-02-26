@@ -16,6 +16,7 @@ public:
 		bool isHW;
 		bool isRef;
 		bool isDI;
+		bool isLightTransport;
 
 		int mouseX;
 		int mouseY;

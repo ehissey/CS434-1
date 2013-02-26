@@ -911,7 +911,7 @@ void TMesh::Load(char *fname) {
   cerr << "INFO: loaded " << vertsN << " verts, " << trisN << " tris from " << endl << "      " << fname << endl;
   cerr << "      xyz " << ((cols) ? "rgb " : "") << ((normals) ? "nxnynz " : "") << ((tcs) ? "tcstct " : "") << endl;
 
-  float max_y = FLT_MIN;
+ /* float max_y = FLT_MIN;
   float min_y = FLT_MAX;
   float max_z = FLT_MIN;
   float min_z = FLT_MAX;
@@ -939,7 +939,7 @@ void TMesh::Load(char *fname) {
 	float scale_y = (verts[i].coords[1]-min_y)/range_y;
 	float scale_z = (verts[i].coords[2]-min_z)/range_z;
 	cols[i] = Vector3D(0.0f, scale_y*scale_z, 0.0f);
-  }
+  }*/
 }
 
 void TMesh::Translate(Vector3D transv){
