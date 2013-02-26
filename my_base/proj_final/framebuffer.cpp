@@ -20,7 +20,14 @@ FrameBuffer::FrameBuffer(int u0, int v0, int _w, int _h) : Fl_Gl_Window(u0, v0, 
 	isHW = false;
 	isDI = false;
 	isRef = false;
+
 	isLightTransport = false;
+	generateLightTransport = false;
+	generateCameraImage = false;
+	generateLightImage = false;
+
+	mouseCameraControl = false;
+	keyboardCameraControl = false;
 }
 
 FrameBuffer::~FrameBuffer(){
@@ -57,41 +64,55 @@ void FrameBuffer::draw(){
 		//nothing for now, will use transport matrix and light vector to derive camera vector (rendered image) instead of calling a regular render function
 		int currLight = 0;
 		
-		for(int v = 0; v < scene->light->h; v++){
-			for(int u = 0; u < scene->light->w; u++){
-				scene->light->currLightDirection = (scene->light->lppc->c + scene->light->lppc->a * u + scene->light->lppc->a * 0.5f + scene->light->lppc->b * v + scene->light->lppc->b * 0.5f).normalize();  //Light direction relative to lppc "eye"
+		if(generateLightTransport){
+			for(int v = 0; v < scene->light->h; v++){
+				for(int u = 0; u < scene->light->w; u++){
+					scene->light->currLightDirection = (scene->light->lppc->c + scene->light->lppc->a * u + scene->light->lppc->a * 0.5f + scene->light->lppc->b * v + scene->light->lppc->b * 0.5f).normalize();  //Light direction relative to lppc "eye"
 			
-				scene->RenderHW();
-				glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-				glFinish();
+					scene->RenderHW();
+					glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+					glFinish();
 
-				scene->light->insertColumnIntoLightTransportMatrix(currLight, scene->hwFB);
+					scene->light->insertColumnIntoLightTransportMatrix(currLight, scene->hwFB);
 
 			
-				if(u == 0){
-					cerr << "Current light row: " << v << " / " << scene->light->h - 1 << endl;
-					cerr << "currLightDirection: " << scene->light->currLightDirection << endl;
+					if(u == 0){
+						cerr << "INFO: Current light row: " << v << " / " << scene->light->h - 1 << endl;
+						//cerr << "currLightDirection: " << scene->light->currLightDirection << endl;
+					}
+
+					currLight++;
 				}
-
-				currLight++;
 			}
+
+			cerr << "INFO: Generating subsambled matrix visualizations" << endl;
+			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/light_transport.tiff");
+			scene->light->transposeLightTransportMatrix();
+			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/light_transport_transpose.tiff");
+			scene->light->transposeLightTransportMatrix();
+
+			generateLightTransport = false;
+			scene->light->lightTransportMatrixCreated = true;
+			generateCameraImage = true;
 		}
 
-		scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/LT.tiff");
+		if(generateCameraImage){
+			cerr << "INFO: Begin generation of view from camera" << endl;
+			scene->light->applyLightTransportMatrixToLightVector(this);
+			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			glFinish();
+			scene->writeTIFF("light_transport/view_from_camera.tiff", this);
+			generateCameraImage = false;
+		}
 
-		cerr << "Creating camera vector" << endl;
-		scene->light->applyLightTransportMatrixToLightVector(this);
-		//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-		glFinish();
-		scene->writeTIFF("light_transport/view_from_camera.tiff", this);
-
-
-		cerr << "Begin generation of view from light" << endl;
-		scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
-		//convertPixToGLFormat();
-		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-		glFinish();
-		scene->writeTIFF("light_transport/view_from_light.tiff", this);
+		if(generateLightImage){
+			cerr << "INFO: Begin generation of view from light" << endl;
+			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
+			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			glFinish();
+			scene->writeTIFF("light_transport/view_from_light.tiff", this);
+			generateLightImage = false;
+		}
 		
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
@@ -260,85 +281,90 @@ void DebugBreak(){
 }
 
 void FrameBuffer::MouseDragHandle(){
-	float rs = 0.1f;
-	int mouse_dx = Fl::event_x() - mouseX;
-	int mouse_dy = Fl::event_y() - mouseY;
-	mouseX = Fl::event_x();
-	mouseY = Fl::event_y();
-	//cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
-	
-	if(mouse_dx != 0){
-		scene->ppc->Pan(rs*mouse_dx);
+	if(mouseCameraControl){
+		float rs = 0.1f;
+		int mouse_dx = Fl::event_x() - mouseX;
+		int mouse_dy = Fl::event_y() - mouseY;
+		mouseX = Fl::event_x();
+		mouseY = Fl::event_y();
+		//cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
+		if(mouse_dx != 0){
+			scene->ppc->Pan(rs*mouse_dx);
+		}
+		if(mouse_dy != 0){
+			scene->ppc->Roll(rs*mouse_dy);
+		}
+		scene->Render();
 	}
-	if(mouse_dy != 0){
-		scene->ppc->Roll(rs*mouse_dy);
-	}
-	scene->Render();
 }
 
 void FrameBuffer::MouseWheelHandle(){
-	int dy = Fl::event_dy();
-	float ts = 6.0f;
+	if(mouseCameraControl){
+		int dy = Fl::event_dy();
+		float ts = 6.0f;
 
-	if(dy < 0){
-		scene->ppc->Translate('f', ts);
-	}else{
-		scene->ppc->Translate('b', ts);
+		if(dy < 0){
+			scene->ppc->Translate('f', ts);
+		}else{
+			scene->ppc->Translate('b', ts);
+		}
+
+		scene->Render();
 	}
-
-	scene->Render();
 }
 
 void FrameBuffer::KeyboardHandle(){
-	float ts = 6.0;
-	float rs = 1.0;
-	Vector3D p0,p1;
-	int key = Fl::event_key();
+	if(keyboardCameraControl){
+		float ts = 6.0;
+		float rs = 1.0;
+		Vector3D p0,p1;
+		int key = Fl::event_key();
 
-	switch(key){
-	case 'w':
-		scene->ppc->Translate('u', ts);
-		break;
-	case 'a':
-		scene->ppc->Translate('l', ts);
-		break;
-	case 's':
-		scene->ppc->Translate('d', ts);
-		break;
-	case 'd':
-		scene->ppc->Translate('r', ts);
-		break;
-	case 'r':
-		scene->ppc->zoom(2.0f,'i');
-		break;
-	case 'f':
-		scene->ppc->zoom(2.0f, 'o');
-		break;
-	case FL_Left:
-		scene->ppc->Pan(rs);
-		break;
-	case FL_Right:
-		scene->ppc->Pan(-rs);
-		break;
-	case FL_Up:
-		scene->ppc->Roll(rs);
-		break;
-	case FL_Down:
-		scene->ppc->Roll(-rs);
-		break;
-	case 'e':
-		scene->ppc->Tilt(rs);
-		break;
-	case 'q':
-		scene->ppc->Tilt(-rs);
-		break;
+		switch(key){
+		case 'w':
+			scene->ppc->Translate('u', ts);
+			break;
+		case 'a':
+			scene->ppc->Translate('l', ts);
+			break;
+		case 's':
+			scene->ppc->Translate('d', ts);
+			break;
+		case 'd':
+			scene->ppc->Translate('r', ts);
+			break;
+		case 'r':
+			scene->ppc->zoom(2.0f,'i');
+			break;
+		case 'f':
+			scene->ppc->zoom(2.0f, 'o');
+			break;
+		case FL_Left:
+			scene->ppc->Pan(rs);
+			break;
+		case FL_Right:
+			scene->ppc->Pan(-rs);
+			break;
+		case FL_Up:
+			scene->ppc->Roll(rs);
+			break;
+		case FL_Down:
+			scene->ppc->Roll(-rs);
+			break;
+		case 'e':
+			scene->ppc->Tilt(rs);
+			break;
+		case 'q':
+			scene->ppc->Tilt(-rs);
+			break;
 
-	default:
-		cerr << "Invalid key" << endl;
-		break;
+		default:
+			cerr << "Invalid key" << endl;
+			break;
+		}
+
+		scene->Render();
 	}
-
-	scene->Render();
 }
 
 bool FrameBuffer::CloserThenSet(Vector3D P){

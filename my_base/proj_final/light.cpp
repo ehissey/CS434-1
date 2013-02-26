@@ -8,8 +8,10 @@ Light::Light(int width, int height, float hfov, Vector3D eye, Vector3D lookAt, P
 	enabled = true;
 	grayscale = true;
 	cameraVectorRendered = false;
+	lightTransportMatrixCreated = false;
+	lightTransportMatrixIsTransposed = false;
 
-	lppc = new PPC(179.5f, width, height);  //Set up directional light grid as a ppc
+	lppc = new PPC(hfov, width, height);  //Set up directional light grid as a ppc
 
 	lppc->PositionAndOrient(eye, lookAt - eye, Vector3D(0.0f, 1.0f, 0.0f), lppc->Getf(), *lppc);  //Look at the object
 
@@ -17,11 +19,6 @@ Light::Light(int width, int height, float hfov, Vector3D eye, Vector3D lookAt, P
 	cameraVector = new float[width*height];
 
 	int cSize = cppc->w*cppc->h;
-
-	/*lightTransportMatrix = new float*[cSize];
-	for(int i = 0; i < cSize; i++){
-		lightTransportMatrix[i] = new float[width*height];
-	}*/
 
 	int TransportMatrixParameters = 1;  //1 matrix for greyscale, 3 matricies for RGB
 
@@ -106,7 +103,7 @@ bool Light::saveLightVectorAsImage(){
 		}
 	}
 
-	scene->writeTIFF("light_transport/LIGHT.TIFF", lightFrameBuffer);
+	scene->writeTIFF("light_transport/light_image.TIFF", lightFrameBuffer);
 
 	return true;
 }
@@ -129,6 +126,8 @@ bool Light::loadLightVector(string filename){
 			lightVector[v*w + u] = temp.coords[0];
 		}
 	}
+
+	cerr << "INFO: Loaded light vector: " << filename << endl;
 
 	return true;
 }
@@ -196,10 +195,16 @@ bool Light::saveSubsampledLightTransportMatrixAsImage(string filename){
 		//Extra credit stuff
 	}
 	
+	cerr << "INFO: Saved light transport: " << filename << endl;
+
 	return true;
 }
 
 bool Light::applyLightTransportMatrixToLightVector(FrameBuffer *fb){
+	if(lightTransportMatrixIsTransposed){
+		transposeLightTransportMatrix();
+	}
+	
 	if(grayscale){
 		unsigned char * rowBuffer = new unsigned char[w*h];
 
@@ -242,10 +247,11 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 		return false;
 	}
 	
-	cerr << "Transposing light transport matrix..." << endl;
-	transposeLightTransportMatrix();
-	saveSubsampledLightTransportMatrixAsImage("light_transport/LT_transpose.tiff");
-	cerr << "Transposing Complete" << endl;
+	if(!lightTransportMatrixIsTransposed){
+		transposeLightTransportMatrix();
+		//saveSubsampledLightTransportMatrixAsImage("light_transport/light_transport_transpose.tiff");
+	}
+	
 
 	if(grayscale){
 		unsigned char * rowBuffer = new unsigned char[w*h];
@@ -287,6 +293,8 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 }
 
 bool Light::transposeLightTransportMatrix(){
+	cerr << "INFO: Begin transposing light transport matrix" << endl;
+	
 	if(grayscale){
 		int currRow = 0;
 		int currCol = 0;
@@ -320,6 +328,10 @@ bool Light::transposeLightTransportMatrix(){
 	}else{
 		//Extra credit stuff
 	}
+
+	lightTransportMatrixIsTransposed = !lightTransportMatrixIsTransposed;
+
+	cerr << "INFO: Transposing light transport matrix complete" << endl;
 
 	return true;
 }

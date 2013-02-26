@@ -69,19 +69,26 @@ Scene::Scene(){
 
 void Scene::captureLightTransportMatrix(){
 	hwFB->isLightTransport = true;
-	hwFB->redraw();
+	hwFB->generateLightTransport = true;
+	Render();
 	
 	return;
+}
+
+void Scene::switchLightTransportViews(){
+	if(light->lightTransportMatrixCreated){
+		Fl::check();
+		//hwFB->generateCameraImage = !(hwFB->generateCameraImage);
+		hwFB->generateLightImage = !(hwFB->generateLightImage);
+
+		Render();
+	}
 }
 
 void Scene::Render(){
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		i->wireframe = wireframe || i->wireframe;
 	}
-	
-	//cout << ppc->GetVD() * ppc->Getf() << endl;
-	//cout << ppc->c << endl;
-	//cout << (ppc->GetVD() * ppc->Getf()).length() << endl;
 
 	if(hwFB){
 		hwFB->redraw();
@@ -206,7 +213,7 @@ void Scene::InitializeHWObjects(){
 	currObjectHandle = currObject;
 	//reflectiveObjectHandle = currObject;
 
-	light = new Light(128, 128, 45.0f, Vector3D(-200.0f, 0.0f, -100.0f), center, ppc);
+	light = new Light(128, 128, 179.5f, Vector3D(-200.0f, 0.0f, -100.0f), center, ppc);
 	ppc->PositionAndOrient(Vector3D(200.0f, 0.0f, -100.0f), (center - Vector3D(200.0f, 0.0f, -100.0f)).normalize(), Vector3D(0.0f, 1.0f, 0.0f), ppc->Getf(), *ppc);  //Look at the object
 }
 

@@ -135,6 +135,10 @@ private:
   static void cb_Ref13(Fl_Button*, void*);
 public:
   Fl_Input *refScaleFactor;
+private:
+  void cb_Switch_i(Fl_Button*, void*);
+  static void cb_Switch(Fl_Button*, void*);
+public:
   void show();
   void DBG_cb();
   void quit_cb();
@@ -193,5 +197,6 @@ public:
   void refLoadCam1_cb();
   void refSaveCam2_cb();
   void refLoadCam2_cb();
+  void switchView_cb();
 };
 #endif

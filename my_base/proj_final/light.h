@@ -14,6 +14,8 @@ public:
 	bool enabled;
 	bool grayscale;
 	bool cameraVectorRendered;
+	bool lightTransportMatrixCreated;
+	bool lightTransportMatrixIsTransposed;
 	float * lightVector;  //Values for the grid lights, ordered by rows.
 	float * cameraVector;  //Values for the camera values, ordered by rows.
 	//float ** lightTransportMatrix;  //Array of column vectors

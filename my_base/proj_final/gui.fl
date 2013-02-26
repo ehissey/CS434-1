@@ -11,17 +11,17 @@ class GUI {open
   } {
     Fl_Window uiw {
       label GUI open
-      xywh {630 135 824 511} type Double align 0 visible
+      xywh {871 134 824 787} type Double align 0 visible
     } {
       Fl_Button {} {
         label DBG
         callback {DBG_cb()}
-        xywh {5 385 95 40} selection_color 72
+        xywh {5 740 95 40} selection_color 72
       }
       Fl_Button {} {
         label Quit
         callback {quit_cb()}
-        xywh {105 385 95 40}
+        xywh {105 740 95 40}
       }
       Fl_Button {} {
         label {Pan Left}
@@ -312,6 +312,11 @@ class GUI {open
         label {Ref Scale Factor}
         xywh {515 205 100 45} labelsize 12
       }
+      Fl_Button {} {
+        label {Switch View}
+        callback {switchView_cb()}
+        xywh {5 405 95 45}
+      }
     }
   }
   Function {} {open
@@ -412,8 +417,7 @@ class GUI {open
   }
   Function {rotObjZ_cb()} {open
   } {
-    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 0.0f, 1.0f), atof(scaleFactor->value()));} {selected
-    }
+    code {scene->currGuiObject->Rotate(scene->currGuiObject->GetCenter(), Vector3D(0.0f, 0.0f, 1.0f), atof(scaleFactor->value()));} {}
     code {scene->Render();} {}
   }
   Function {wireframeOn_cb()} {open
@@ -597,5 +601,9 @@ class GUI {open
   Function {refLoadCam2_cb()} {open
   } {
     code {scene->RefLoadView1();} {}
+  }
+  Function {switchView_cb()} {open selected
+  } {
+    code {scene->switchLightTransportViews();} {}
   }
 } 

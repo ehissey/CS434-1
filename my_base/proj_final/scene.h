@@ -91,6 +91,7 @@ public:
 	void RefGoToView(PPC *nppc);
 
 	void captureLightTransportMatrix();
+	void switchLightTransportViews();
 
 	GLuint fboId;
 	GLuint rboId;
