@@ -78,10 +78,32 @@ void Scene::captureLightTransportMatrix(){
 void Scene::switchLightTransportViews(){
 	if(light->lightTransportMatrixCreated){
 		Fl::check();
-		//hwFB->generateCameraImage = !(hwFB->generateCameraImage);
+		hwFB->generateCameraImage = !(hwFB->generateCameraImage);
 		hwFB->generateLightImage = !(hwFB->generateLightImage);
 
 		Render();
+		Fl::check();
+		hwFB->show();
+	}
+}
+
+void Scene::switchToLightViewOfLightTransport(){
+	if(light->lightTransportMatrixCreated){
+		hwFB->generateCameraImage = false;
+		hwFB->generateLightImage = true;
+		Render();
+		Fl::check();
+		hwFB->show();
+	}
+}
+
+void Scene::switchToCameraViewOfLightTransport(){
+	if(light->lightTransportMatrixCreated){
+		hwFB->generateCameraImage = true;
+		hwFB->generateLightImage = false;
+		Render();
+		Fl::check();
+		hwFB->show();
 	}
 }
 

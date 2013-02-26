@@ -40,4 +40,7 @@ public:
 	bool applyLightTransportMatrixToLightVector(FrameBuffer *fb);
 	bool applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb);
 	bool transposeLightTransportMatrix();
+
+	unsigned char accessLightTransportMatrix(int matrixID, int col, int row);
+	void writeToLightTransportMatrix(int matrixID, int col, int row, unsigned char value);
 };

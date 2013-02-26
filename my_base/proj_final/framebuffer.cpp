@@ -94,24 +94,23 @@ void FrameBuffer::draw(){
 			generateLightTransport = false;
 			scene->light->lightTransportMatrixCreated = true;
 			generateCameraImage = true;
+			generateLightImage = false;
 		}
 
 		if(generateCameraImage){
 			cerr << "INFO: Begin generation of view from camera" << endl;
 			scene->light->applyLightTransportMatrixToLightVector(this);
-			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-			glFinish();
+			//glFinish();
 			scene->writeTIFF("light_transport/view_from_camera.tiff", this);
-			generateCameraImage = false;
-		}
-
-		if(generateLightImage){
+			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			//generateCameraImage = false;
+		}else if(generateLightImage){
 			cerr << "INFO: Begin generation of view from light" << endl;
 			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
-			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-			glFinish();
+			//glFinish();
 			scene->writeTIFF("light_transport/view_from_light.tiff", this);
-			generateLightImage = false;
+			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			//generateLightImage = false;
 		}
 		
 	}else{

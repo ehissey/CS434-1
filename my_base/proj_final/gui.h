@@ -138,6 +138,10 @@ public:
 private:
   void cb_Switch_i(Fl_Button*, void*);
   static void cb_Switch(Fl_Button*, void*);
+  void cb_Light6_i(Fl_Button*, void*);
+  static void cb_Light6(Fl_Button*, void*);
+  void cb_Camera_i(Fl_Button*, void*);
+  static void cb_Camera(Fl_Button*, void*);
 public:
   void show();
   void DBG_cb();
@@ -198,5 +202,7 @@ public:
   void refSaveCam2_cb();
   void refLoadCam2_cb();
   void switchView_cb();
+  void lightView_cb();
+  void cameraView_cb();
 };
 #endif

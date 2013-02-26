@@ -92,6 +92,8 @@ public:
 
 	void captureLightTransportMatrix();
 	void switchLightTransportViews();
+	void switchToLightViewOfLightTransport();
+	void switchToCameraViewOfLightTransport();
 
 	GLuint fboId;
 	GLuint rboId;

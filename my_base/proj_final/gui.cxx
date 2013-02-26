@@ -407,19 +407,33 @@ void GUI::cb_Switch_i(Fl_Button*, void*) {
 void GUI::cb_Switch(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Switch_i(o,v);
 }
+
+void GUI::cb_Light6_i(Fl_Button*, void*) {
+  lightView_cb();
+}
+void GUI::cb_Light6(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Light6_i(o,v);
+}
+
+void GUI::cb_Camera_i(Fl_Button*, void*) {
+  cameraView_cb();
+}
+void GUI::cb_Camera(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Camera_i(o,v);
+}
 #include "scene.h"
 #include <string>
 #include <stdlib.h>
 
 GUI::GUI() {
-  { uiw = new Fl_Double_Window(824, 787, "GUI");
+  { uiw = new Fl_Double_Window(824, 586, "GUI");
     uiw->user_data((void*)(this));
     uiw->align(FL_ALIGN_CENTER);
-    { Fl_Button* o = new Fl_Button(5, 740, 95, 40, "DBG");
+    { Fl_Button* o = new Fl_Button(5, 540, 95, 40, "DBG");
       o->selection_color((Fl_Color)FL_DARK_RED);
       o->callback((Fl_Callback*)cb_DBG);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 740, 95, 40, "Quit");
+    { Fl_Button* o = new Fl_Button(105, 540, 95, 40, "Quit");
       o->callback((Fl_Callback*)cb_Quit);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(5, 55, 95, 45, "Pan Left");
@@ -616,6 +630,12 @@ GUI::GUI() {
     } // Fl_Input* refScaleFactor
     { Fl_Button* o = new Fl_Button(5, 405, 95, 45, "Switch View");
       o->callback((Fl_Callback*)cb_Switch);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(105, 405, 95, 45, "Light View");
+      o->callback((Fl_Callback*)cb_Light6);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(205, 405, 95, 45, "Camera View");
+      o->callback((Fl_Callback*)cb_Camera);
     } // Fl_Button* o
     uiw->end();
   } // Fl_Double_Window* uiw
@@ -907,4 +927,12 @@ void GUI::refLoadCam2_cb() {
 
 void GUI::switchView_cb() {
   scene->switchLightTransportViews();
+}
+
+void GUI::lightView_cb() {
+  scene->switchToLightViewOfLightTransport();
+}
+
+void GUI::cameraView_cb() {
+  scene->switchToCameraViewOfLightTransport();
 }

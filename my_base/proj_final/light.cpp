@@ -146,7 +146,8 @@ bool Light::insertColumnIntoLightTransportMatrix(int col, FrameBuffer * fb){
 				valToInsert = ((tempCol.coords[0] + tempCol.coords[1] + tempCol.coords[2]) / 3.0f) * 255.0f;
 			}
 
-			lightTransportMatrix[0][col][i] = valToInsert;
+			//lightTransportMatrix[0][col][i] = valToInsert;
+			writeToLightTransportMatrix(0, col, i, valToInsert);
 		}
 	
 	}else{
@@ -173,7 +174,8 @@ bool Light::saveSubsampledLightTransportMatrixAsImage(string filename){
 				//Find max value out of 4x4 block of values in LT matrix
 				for(int vprime = v; vprime < v+4; vprime++){
 					for(int uprime = u; uprime < u+4; uprime++){
-						unsigned char temp = lightTransportMatrix[0][uprime][vprime];
+						//unsigned char temp = lightTransportMatrix[0][uprime][vprime];
+						unsigned char temp = accessLightTransportMatrix(0, uprime, vprime);
 						if(temp > max){
 							max = temp;
 						}
@@ -210,7 +212,8 @@ bool Light::applyLightTransportMatrixToLightVector(FrameBuffer *fb){
 
 		for(int c_i = 0; c_i < w*h; c_i++){
 			for(int col = 0; col < w*h; col++){
-				rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+				//rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+				rowBuffer[col] = accessLightTransportMatrix(0, col, c_i);
 			}
 
 			unsigned int sum = 0;
@@ -244,6 +247,8 @@ bool Light::applyLightTransportMatrixToLightVector(FrameBuffer *fb){
 
 bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 	if(!cameraVectorRendered){
+		cerr << "ERROR: Camera vector not rendered" << endl;
+		
 		return false;
 	}
 	
@@ -261,13 +266,14 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 				int c_i = v*w + u;
 
 				for(int col = 0; col < w*h; col++){
-					rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+					//rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+					rowBuffer[col] = accessLightTransportMatrix(0, col, c_i);
 				}
 
 				unsigned int sum = 0;
 				unsigned int count = 0;
 				for(int l_i = 0; l_i < w*h; l_i++){
-					if(rowBuffer[l_i] != 0){
+					if(rowBuffer[l_i] > 0.01f){
 						sum = sum + rowBuffer[l_i] * cameraVector[l_i];
 						count++;
 					}
@@ -279,8 +285,8 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 
 				Vector3D valToAssign = Vector3D(sum / 255.0f, sum / 255.0f, sum / 255.0f);
 
-				//fb->pix[c_i] = valToAssign.GetColor();
 				fb->Set(u,v,valToAssign.GetColor());
+				//fb->pix[c_i] = valToAssign.GetColor();
 			}
 		}
 
@@ -294,7 +300,7 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 
 bool Light::transposeLightTransportMatrix(){
 	cerr << "INFO: Begin transposing light transport matrix" << endl;
-	
+	/*
 	if(grayscale){
 		int currRow = 0;
 		int currCol = 0;
@@ -328,10 +334,31 @@ bool Light::transposeLightTransportMatrix(){
 	}else{
 		//Extra credit stuff
 	}
-
+	*/
 	lightTransportMatrixIsTransposed = !lightTransportMatrixIsTransposed;
 
 	cerr << "INFO: Transposing light transport matrix complete" << endl;
 
 	return true;
+}
+
+unsigned char Light::accessLightTransportMatrix(int matrixID, int col, int row){
+	unsigned char retval = 0;
+
+	if(lightTransportMatrixIsTransposed){
+		retval = lightTransportMatrix[0][row][col];
+	}else{
+		retval = lightTransportMatrix[0][col][row];
+	}
+
+	return retval;
+}
+
+void Light::writeToLightTransportMatrix(int matrixID, int col, int row, unsigned char value){
+	if(lightTransportMatrixIsTransposed){
+		lightTransportMatrix[0][row][col] = value;
+	}else{
+		lightTransportMatrix[0][col][row] = value;
+	}
+
 }
