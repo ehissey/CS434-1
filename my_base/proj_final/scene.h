@@ -94,6 +94,10 @@ public:
 	void switchLightTransportViews();
 	void switchToLightViewOfLightTransport();
 	void switchToCameraViewOfLightTransport();
+	void setLightTransportLightAllOn();
+	void setLightTransportLightAllOff();
+	void setLightTransportLightChecker();
+	void lightTransportLoadLightVector(string filename);
 
 	GLuint fboId;
 	GLuint rboId;

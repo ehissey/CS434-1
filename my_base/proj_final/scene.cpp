@@ -84,6 +84,8 @@ void Scene::switchLightTransportViews(){
 		Render();
 		Fl::check();
 		hwFB->show();
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
 	}
 }
 
@@ -94,6 +96,8 @@ void Scene::switchToLightViewOfLightTransport(){
 		Render();
 		Fl::check();
 		hwFB->show();
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
 	}
 }
 
@@ -104,6 +108,122 @@ void Scene::switchToCameraViewOfLightTransport(){
 		Render();
 		Fl::check();
 		hwFB->show();
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
+	}
+}
+
+void Scene::setLightTransportLightAllOn(){
+	if(light->lightTransportMatrixCreated){
+		light->setLightVector(1.0f);
+
+		hwFB->generateCameraImage = true;
+		hwFB->generateLightImage = false;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_all_lights_on_view_from_camera.tiff", hwFB);
+
+		hwFB->generateCameraImage = false;
+		hwFB->generateLightImage = true;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_all_lights_on_view_from_light.tiff", hwFB);
+		cerr << "INFO: Light All On render complete" << endl;
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
+	}
+}
+
+void Scene::setLightTransportLightAllOff(){
+	if(light->lightTransportMatrixCreated){
+		light->setLightVector(0.0f);
+	
+		hwFB->generateCameraImage = true;
+		hwFB->generateLightImage = false;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_all_lights_off_view_from_camera.tiff", hwFB);
+
+		hwFB->generateCameraImage = false;
+		hwFB->generateLightImage = true;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_all_lights_off_view_from_light.tiff", hwFB);
+		cerr << "INFO: Light All Off render complete" << endl;
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
+	}
+}
+
+void Scene::setLightTransportLightChecker(){
+	if(light->lightTransportMatrixCreated){
+		light->setLightVectorCheckered(4);
+	
+		hwFB->generateCameraImage = true;
+		hwFB->generateLightImage = false;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_4x4_checker_view_from_camera.tiff", hwFB);
+
+		hwFB->generateCameraImage = false;
+		hwFB->generateLightImage = true;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_4x4_checker_view_from_light.tiff", hwFB);
+		cerr << "INFO: Light Checker render complete" << endl;
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
+	}
+}
+
+void Scene::lightTransportLoadLightVector(string filename){
+	TIFF *FILE;
+
+	if((FILE = TIFFOpen(filename.c_str(), "r")) == 0){
+		return;
+	}else{
+		int w = 0;
+		int h = 0;
+
+		TIFFGetField(FILE, TIFFTAG_IMAGEWIDTH, &w);
+		TIFFGetField(FILE, TIFFTAG_IMAGELENGTH, &h);
+
+		if(w != light->w){
+			cerr << "ERROR: Invalid image width for loaded light image, must be " << light->w << endl;
+			return;
+		}else if(h != light->h){
+			cerr << "ERROR: Invalid image height for loaded light image, must be " << light->h << endl;
+			return;
+		}
+	}
+
+	TIFFClose(FILE);
+
+	if(light->lightTransportMatrixCreated){
+		light->loadLightVector(filename);
+
+		hwFB->generateCameraImage = true;
+		hwFB->generateLightImage = false;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_loaded_light_view_from_camera.tiff", hwFB);
+
+		hwFB->generateCameraImage = false;
+		hwFB->generateLightImage = true;
+		Render();
+		Fl::check();
+		hwFB->show();
+		writeTIFF("light_transport/OUTPUT_loaded_light_view_from_light.tiff", hwFB);
+		cerr << "INFO: Loaded light vector render complete" << endl;
+	}else{
+		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
 	}
 }
 
@@ -210,7 +330,7 @@ void Scene::InitializeHWObjects(){
 	float sl = 256.0;
 
 	currObject = new TMesh();
-	currObject->Load("geometry/bunny.bin");
+	currObject->Load("geometry/teapot57k.bin");
 
 	AABB aabb = currObject->GetAABB();
 	float size0 = (aabb.corners[1]-aabb.corners[0]).length();

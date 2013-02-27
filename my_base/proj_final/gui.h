@@ -136,12 +136,17 @@ private:
 public:
   Fl_Input *refScaleFactor;
 private:
-  void cb_Switch_i(Fl_Button*, void*);
-  static void cb_Switch(Fl_Button*, void*);
   void cb_Light6_i(Fl_Button*, void*);
   static void cb_Light6(Fl_Button*, void*);
-  void cb_Camera_i(Fl_Button*, void*);
-  static void cb_Camera(Fl_Button*, void*);
+  void cb_Light7_i(Fl_Button*, void*);
+  static void cb_Light7(Fl_Button*, void*);
+  void cb_Light8_i(Fl_Button*, void*);
+  static void cb_Light8(Fl_Button*, void*);
+public:
+  Fl_Input *loadLightVector;
+private:
+  void cb_Load2_i(Fl_Button*, void*);
+  static void cb_Load2(Fl_Button*, void*);
 public:
   void show();
   void DBG_cb();
@@ -201,8 +206,9 @@ public:
   void refLoadCam1_cb();
   void refSaveCam2_cb();
   void refLoadCam2_cb();
-  void switchView_cb();
-  void lightView_cb();
-  void cameraView_cb();
+  void lightAllOn_cb();
+  void lightAllOff_cb();
+  void lightChecker_cb();
+  void loadLightVector_cb();
 };
 #endif

@@ -86,30 +86,44 @@ void FrameBuffer::draw(){
 			}
 
 			cerr << "INFO: Generating subsambled matrix visualizations" << endl;
-			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/light_transport.tiff");
+			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/OUTPUT_light_transport_subsampled_matrix.tiff");
 			scene->light->transposeLightTransportMatrix();
-			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/light_transport_transpose.tiff");
+			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/OUTPUT_light_transport_transpose_subsampled_matrix.tiff");
 			scene->light->transposeLightTransportMatrix();
 
 			generateLightTransport = false;
 			scene->light->lightTransportMatrixCreated = true;
-			generateCameraImage = true;
+
+			cerr << "INFO: Begin generation of view from camera" << endl;
+			scene->light->applyLightTransportMatrixToLightVector(this);
+			//glFinish();
+			scene->writeTIFF("light_transport/OUTPUT_initial_view_from_camera.tiff", this);
+			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+
+			cerr << "INFO: Begin generation of view from light" << endl;
+			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
+			//glFinish();
+			scene->writeTIFF("light_transport/OUTPUT_initial_view_from_light.tiff", this);
+			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+
+			generateCameraImage = false;
 			generateLightImage = false;
+			cerr << "INFO: Initial light render complete" << endl;
 		}
 
 		if(generateCameraImage){
 			cerr << "INFO: Begin generation of view from camera" << endl;
 			scene->light->applyLightTransportMatrixToLightVector(this);
 			//glFinish();
-			scene->writeTIFF("light_transport/view_from_camera.tiff", this);
-			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			//scene->writeTIFF("light_transport/view_from_camera.tiff", this);
+			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 			//generateCameraImage = false;
 		}else if(generateLightImage){
 			cerr << "INFO: Begin generation of view from light" << endl;
 			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
 			//glFinish();
-			scene->writeTIFF("light_transport/view_from_light.tiff", this);
-			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
+			//scene->writeTIFF("light_transport/view_from_light.tiff", this);
+			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 			//generateLightImage = false;
 		}
 		

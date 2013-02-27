@@ -18,6 +18,9 @@ public:
 	bool lightTransportMatrixIsTransposed;
 	float * lightVector;  //Values for the grid lights, ordered by rows.
 	float * cameraVector;  //Values for the camera values, ordered by rows.
+	float * cameraVectorR;  //Values for the camera values, ordered by rows.
+	float * cameraVectorG;  //Values for the camera values, ordered by rows.
+	float * cameraVectorB;  //Values for the camera values, ordered by rows.
 	//float ** lightTransportMatrix;  //Array of column vectors
 	unsigned char *** lightTransportMatrix;
 

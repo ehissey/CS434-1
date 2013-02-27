@@ -6,7 +6,7 @@
 
 Light::Light(int width, int height, float hfov, Vector3D eye, Vector3D lookAt, PPC * cppc){
 	enabled = true;
-	grayscale = true;
+	grayscale = false;
 	cameraVectorRendered = false;
 	lightTransportMatrixCreated = false;
 	lightTransportMatrixIsTransposed = false;
@@ -17,10 +17,13 @@ Light::Light(int width, int height, float hfov, Vector3D eye, Vector3D lookAt, P
 
 	lightVector = new float[width*height];
 	cameraVector = new float[width*height];
+	cameraVectorR = new float[width*height];
+	cameraVectorG = new float[width*height];
+	cameraVectorB = new float[width*height];
 
 	int cSize = cppc->w*cppc->h;
 
-	int TransportMatrixParameters = 1;  //1 matrix for greyscale, 3 matricies for RGB
+	int TransportMatrixParameters = 3;  //1 matrix for greyscale, 3 matricies for RGB
 
 	lightTransportMatrix = new unsigned char**[TransportMatrixParameters];  //Initialize pointers to matricies
 	for(int i = 0; i < TransportMatrixParameters; i++){
@@ -49,6 +52,10 @@ Light::Light(int width, int height, float hfov, Vector3D eye, Vector3D lookAt, P
 Light::~Light(){
 	delete lppc;
 	delete lightVector;
+	delete cameraVector;
+	delete cameraVectorR;
+	delete cameraVectorG;
+	delete cameraVectorB;
 }
 
 bool Light::setLightVector(float value){
@@ -103,7 +110,7 @@ bool Light::saveLightVectorAsImage(){
 		}
 	}
 
-	scene->writeTIFF("light_transport/light_image.TIFF", lightFrameBuffer);
+	scene->writeTIFF("light_transport/INPUT_light_image.TIFF", lightFrameBuffer);
 
 	return true;
 }
@@ -152,6 +159,29 @@ bool Light::insertColumnIntoLightTransportMatrix(int col, FrameBuffer * fb){
 	
 	}else{
 		//Extra credit stuff
+		for(int i = 0; i < w*h; i++){
+			Vector3D tempCol;
+			tempCol.SetFromColor(fb->pix[i]);
+
+			unsigned char valToInsertR = 0;
+			unsigned char valToInsertG = 0;
+			unsigned char valToInsertB = 0;
+
+			if(tempCol.coords[0] < 0.001f && tempCol.coords[1] < 0.001f && tempCol.coords[2] < 0.001f){
+				valToInsertR = 0;
+				valToInsertG = 0;
+				valToInsertB = 0;
+			}else{
+				valToInsertR = tempCol.coords[0] * 255.0f;
+				valToInsertG = tempCol.coords[1] * 255.0f;
+				valToInsertB = tempCol.coords[2] * 255.0f;
+			}
+
+			//lightTransportMatrix[0][col][i] = valToInsert;
+			writeToLightTransportMatrix(0, col, i, valToInsertR);
+			writeToLightTransportMatrix(1, col, i, valToInsertG);
+			writeToLightTransportMatrix(2, col, i, valToInsertB);
+		}
 	}
 	
 	return true;
@@ -195,6 +225,50 @@ bool Light::saveSubsampledLightTransportMatrixAsImage(string filename){
 		delete LTGrayScale;
 	}else{
 		//Extra credit stuff
+		int LTFB_h = w*h / 4.0f;
+		int LTFB_w = w*h / 4.0f;
+
+		FrameBuffer * LTGrayScale = new FrameBuffer(0.0f, 0.0f, LTFB_w, LTFB_h);
+		int pixv = 0;
+		int pixu = 0;
+		for(int v = 0; v < w*h; v+=4){
+			pixu = 0;
+			for(int u = 0; u < w*h; u+=4){
+				Vector3D valToAssign = Vector3D(0.0f, 0.0f, 0.0f);
+				unsigned char maxR = 0;
+				unsigned char maxG = 0;
+				unsigned char maxB = 0;
+
+				//Find max value out of 4x4 block of values in LT matrix
+				for(int vprime = v; vprime < v+4; vprime++){
+					for(int uprime = u; uprime < u+4; uprime++){
+						//unsigned char temp = lightTransportMatrix[0][uprime][vprime];
+						unsigned char tempR = accessLightTransportMatrix(0, uprime, vprime);
+						unsigned char tempG = accessLightTransportMatrix(1, uprime, vprime);
+						unsigned char tempB = accessLightTransportMatrix(2, uprime, vprime);
+						if(tempR > maxR){
+							maxR = tempR;
+						}
+						if(tempG > maxG){
+							maxG = tempG;
+						}
+						if(tempB > maxB){
+							maxB = tempB;
+						}
+					}
+				}
+
+				valToAssign = Vector3D(maxR/255.0f, maxG/255.0f, maxB/255.0f);
+				LTGrayScale->pix[(LTFB_h - 1 - pixv)*LTFB_w + pixu] = valToAssign.GetColor();
+				//LTGrayScale->pix[pixv*LTFB_w + pixu] = valToAssign.GetColor();
+				pixu++;
+			}
+			pixv++;
+		}
+
+		scene->writeTIFF(filename, LTGrayScale);
+
+		delete LTGrayScale;
 	}
 	
 	cerr << "INFO: Saved light transport: " << filename << endl;
@@ -240,6 +314,64 @@ bool Light::applyLightTransportMatrixToLightVector(FrameBuffer *fb){
 		cameraVectorRendered = true;
 	}else{
 		//Extra credit stuff
+		unsigned char * rowBufferR = new unsigned char[w*h];
+		unsigned char * rowBufferG = new unsigned char[w*h];
+		unsigned char * rowBufferB = new unsigned char[w*h];
+
+		for(int c_i = 0; c_i < w*h; c_i++){
+			for(int col = 0; col < w*h; col++){
+				//rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+				rowBufferR[col] = accessLightTransportMatrix(0, col, c_i);
+				rowBufferG[col] = accessLightTransportMatrix(1, col, c_i);
+				rowBufferB[col] = accessLightTransportMatrix(2, col, c_i);
+			}
+
+			unsigned int sumR = 0;
+			unsigned int countR = 0;
+			unsigned int sumG = 0;
+			unsigned int countG = 0;
+			unsigned int sumB = 0;
+			unsigned int countB = 0;
+			for(int l_i = 0; l_i < w*h; l_i++){
+				if(rowBufferR[l_i] > 0.01f){
+					sumR = sumR + rowBufferR[l_i] * lightVector[l_i];
+					countR++;
+				}
+				if(rowBufferG[l_i] > 0.01f){
+					sumG = sumG + rowBufferG[l_i] * lightVector[l_i];
+					countG++;
+				}
+				if(rowBufferB[l_i] > 0.01f){
+					sumB = sumB + rowBufferB[l_i] * lightVector[l_i];
+					countB++;
+				}
+			}
+
+			if(countR != 0){
+				sumR = sumR / countR;
+			}
+
+			if(countG != 0){
+				sumG = sumG / countG;
+			}
+
+			if(countB != 0){
+				sumB = sumB / countB;
+			}
+
+			Vector3D valToAssign = Vector3D(sumR / 255.0f, sumG / 255.0f, sumB / 255.0f);
+
+			//fb->pix[c_i] = valToAssign.GetColor();
+			cameraVectorR[c_i] = sumR / 255.0f;
+			cameraVectorG[c_i] = sumG / 255.0f;
+			cameraVectorB[c_i] = sumB / 255.0f;
+			fb->pix[c_i] = valToAssign.GetColor();
+		}
+
+		delete rowBufferR;
+		delete rowBufferG;
+		delete rowBufferB;
+		cameraVectorRendered = true;
 	}
 
 	return true;
@@ -293,6 +425,64 @@ bool Light::applyTransposeLightTransportMatrixToCameraVector(FrameBuffer *fb){
 		delete rowBuffer;
 	}else{
 		//Extra credit stuff
+		unsigned char * rowBufferR = new unsigned char[w*h];
+		unsigned char * rowBufferG = new unsigned char[w*h];
+		unsigned char * rowBufferB = new unsigned char[w*h];
+
+		for(int v = 0; v < h; v++){
+			for(int u = 0; u < w; u++){
+				int c_i = v*w + u;
+
+				for(int col = 0; col < w*h; col++){
+					//rowBuffer[col] = lightTransportMatrix[0][col][c_i];
+					rowBufferR[col] = accessLightTransportMatrix(0, col, c_i);
+					rowBufferG[col] = accessLightTransportMatrix(1, col, c_i);
+					rowBufferB[col] = accessLightTransportMatrix(2, col, c_i);
+				}
+
+				unsigned int sumR = 0;
+				unsigned int countR = 0;
+				unsigned int sumG = 0;
+				unsigned int countG = 0;
+				unsigned int sumB = 0;
+				unsigned int countB = 0;
+				for(int l_i = 0; l_i < w*h; l_i++){
+					if(rowBufferR[l_i] > 0.01f){
+						sumR = sumR + rowBufferR[l_i] * cameraVectorR[l_i];
+						countR++;
+					}
+					if(rowBufferG[l_i] > 0.01f){
+						sumG = sumG + rowBufferG[l_i] * cameraVectorG[l_i];
+						countG++;
+					}
+					if(rowBufferB[l_i] > 0.01f){
+						sumB = sumB + rowBufferB[l_i] * cameraVectorB[l_i];
+						countB++;
+					}
+				}
+
+				if(countR != 0){
+					sumR = sumR / countR;
+				}
+
+				if(countG != 0){
+					sumG = sumG / countG;
+				}
+
+				if(countB != 0){
+					sumB = sumB / countB;
+				}
+
+				Vector3D valToAssign = Vector3D(sumR / 255.0f, sumG / 255.0f, sumB / 255.0f);
+
+				fb->Set(u,v,valToAssign.GetColor());
+				//fb->pix[c_i] = valToAssign.GetColor();
+			}
+		}
+
+		delete rowBufferR;
+		delete rowBufferG;
+		delete rowBufferB;
 	}
 
 	return true;
@@ -346,9 +536,9 @@ unsigned char Light::accessLightTransportMatrix(int matrixID, int col, int row){
 	unsigned char retval = 0;
 
 	if(lightTransportMatrixIsTransposed){
-		retval = lightTransportMatrix[0][row][col];
+		retval = lightTransportMatrix[matrixID][row][col];
 	}else{
-		retval = lightTransportMatrix[0][col][row];
+		retval = lightTransportMatrix[matrixID][col][row];
 	}
 
 	return retval;
@@ -356,9 +546,9 @@ unsigned char Light::accessLightTransportMatrix(int matrixID, int col, int row){
 
 void Light::writeToLightTransportMatrix(int matrixID, int col, int row, unsigned char value){
 	if(lightTransportMatrixIsTransposed){
-		lightTransportMatrix[0][row][col] = value;
+		lightTransportMatrix[matrixID][row][col] = value;
 	}else{
-		lightTransportMatrix[0][col][row] = value;
+		lightTransportMatrix[matrixID][col][row] = value;
 	}
 
 }
