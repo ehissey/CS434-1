@@ -75,18 +75,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\$(ProjectName)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cg.lib;cgGL.lib;tiff.lib;fltk.lib;fltkgl.lib;opengl32.lib;glu32.lib;wsock32.lib;comctl32.lib;zlib.lib;libtiff.lib;fltkd.lib;fltkjpegd.lib;fltkimagesd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cg.lib;cgGL.lib;tiff.lib;fltk.lib;fltkgl.lib;opengl32.lib;glu32.lib;wsock32.lib;comctl32.lib;zlib.lib;libtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="CGInterface.h" />
-    <ClInclude Include="depthimage.h" />
     <ClInclude Include="envmap.h" />
     <ClInclude Include="framebuffer.h" />
     <ClInclude Include="gui.h" />
-    <ClInclude Include="light.h" />
     <ClInclude Include="Matrix3x3.h" />
     <ClInclude Include="pointlight.h" />
     <ClInclude Include="ppc.h" />
@@ -97,11 +95,9 @@
   <ItemGroup>
     <ClCompile Include="aabb.cpp" />
     <ClCompile Include="CGInterface.cpp" />
-    <ClCompile Include="depthimage.cpp" />
     <ClCompile Include="envmap.cpp" />
     <ClCompile Include="framebuffer.cpp" />
     <ClCompile Include="gui.cxx" />
-    <ClCompile Include="light.cpp" />
     <ClCompile Include="Matrix3x3.cpp" />
     <ClCompile Include="pointlight.cpp" />
     <ClCompile Include="ppc.cpp" />

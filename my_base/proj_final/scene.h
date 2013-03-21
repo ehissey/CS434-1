@@ -8,9 +8,7 @@
 #include "tmesh.h"
 #include "pointlight.h"
 #include "envmap.h"
-#include "depthimage.h"
 #include "CGInterface.h"
-#include "light.h"
 
 #include <string>
 #include <list>
@@ -37,8 +35,6 @@ public:
 	FrameBuffer *fb, *refFB, *hwFB;
 	PointLight *pl;
 	Envmap *env;
-	DepthImage *DI;
-	Light * light;
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;
@@ -89,18 +85,6 @@ public:
 	void RefSaveView1();
 	void RefLoadView1();
 	void RefGoToView(PPC *nppc);
-
-	void captureLightTransportMatrix();
-	void switchLightTransportViews();
-	void switchToLightViewOfLightTransport();
-	void switchToCameraViewOfLightTransport();
-	void setLightTransportLightAllOn();
-	void setLightTransportLightAllOff();
-	void setLightTransportLightChecker();
-	void lightTransportLoadLightVector(string filename);
-
-	GLuint fboId;
-	GLuint rboId;
 };
 
 extern Scene *scene;

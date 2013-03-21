@@ -26,11 +26,11 @@ Scene::Scene(){
 
 	int u0 = 20;
 	int v0 = 50;
-	int sci = 1;
-	//int w = sci * 320;
-	//int h = sci * 240;
-	int w = sci * 128;
-	int h = sci * 128;
+	int sci = 2;
+	int w = sci * 320;
+	int h = sci * 240;
+	//int w = sci * 128;
+	//int h = sci * 128;
 
 	gui = new GUI();
 	gui->show();
@@ -52,179 +52,14 @@ Scene::Scene(){
 	
 	InitializeHWObjects();
 
-	DI = 0;
-	//DI = new DepthImage(hwFB, ppc, diffuseObjectHandle, 513, 512);
-
-	hwFB->isDI = false;
 	hwFB->show();
 
 	refPPC = 0;
 	refFB = 0;
 
-	
-
-	//Render();
-	
-}
-
-void Scene::captureLightTransportMatrix(){
-	hwFB->isLightTransport = true;
-	hwFB->generateLightTransport = true;
 	Render();
-	
-	return;
-}
 
-void Scene::switchLightTransportViews(){
-	if(light->lightTransportMatrixCreated){
-		Fl::check();
-		hwFB->generateCameraImage = !(hwFB->generateCameraImage);
-		hwFB->generateLightImage = !(hwFB->generateLightImage);
-
-		Render();
-		Fl::check();
-		hwFB->show();
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::switchToLightViewOfLightTransport(){
-	if(light->lightTransportMatrixCreated){
-		hwFB->generateCameraImage = false;
-		hwFB->generateLightImage = true;
-		Render();
-		Fl::check();
-		hwFB->show();
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::switchToCameraViewOfLightTransport(){
-	if(light->lightTransportMatrixCreated){
-		hwFB->generateCameraImage = true;
-		hwFB->generateLightImage = false;
-		Render();
-		Fl::check();
-		hwFB->show();
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::setLightTransportLightAllOn(){
-	if(light->lightTransportMatrixCreated){
-		light->setLightVector(1.0f);
-
-		hwFB->generateCameraImage = true;
-		hwFB->generateLightImage = false;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_all_lights_on_view_from_camera.tiff", hwFB);
-
-		hwFB->generateCameraImage = false;
-		hwFB->generateLightImage = true;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_all_lights_on_view_from_light.tiff", hwFB);
-		cerr << "INFO: Light All On render complete" << endl;
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::setLightTransportLightAllOff(){
-	if(light->lightTransportMatrixCreated){
-		light->setLightVector(0.0f);
-	
-		hwFB->generateCameraImage = true;
-		hwFB->generateLightImage = false;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_all_lights_off_view_from_camera.tiff", hwFB);
-
-		hwFB->generateCameraImage = false;
-		hwFB->generateLightImage = true;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_all_lights_off_view_from_light.tiff", hwFB);
-		cerr << "INFO: Light All Off render complete" << endl;
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::setLightTransportLightChecker(){
-	if(light->lightTransportMatrixCreated){
-		light->setLightVectorCheckered(4);
-	
-		hwFB->generateCameraImage = true;
-		hwFB->generateLightImage = false;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_4x4_checker_view_from_camera.tiff", hwFB);
-
-		hwFB->generateCameraImage = false;
-		hwFB->generateLightImage = true;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_4x4_checker_view_from_light.tiff", hwFB);
-		cerr << "INFO: Light Checker render complete" << endl;
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
-}
-
-void Scene::lightTransportLoadLightVector(string filename){
-	TIFF *FILE;
-
-	if((FILE = TIFFOpen(filename.c_str(), "r")) == 0){
-		return;
-	}else{
-		int w = 0;
-		int h = 0;
-
-		TIFFGetField(FILE, TIFFTAG_IMAGEWIDTH, &w);
-		TIFFGetField(FILE, TIFFTAG_IMAGELENGTH, &h);
-
-		if(w != light->w){
-			cerr << "ERROR: Invalid image width for loaded light image, must be " << light->w << endl;
-			return;
-		}else if(h != light->h){
-			cerr << "ERROR: Invalid image height for loaded light image, must be " << light->h << endl;
-			return;
-		}
-	}
-
-	TIFFClose(FILE);
-
-	if(light->lightTransportMatrixCreated){
-		light->loadLightVector(filename);
-
-		hwFB->generateCameraImage = true;
-		hwFB->generateLightImage = false;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_loaded_light_view_from_camera.tiff", hwFB);
-
-		hwFB->generateCameraImage = false;
-		hwFB->generateLightImage = true;
-		Render();
-		Fl::check();
-		hwFB->show();
-		writeTIFF("light_transport/OUTPUT_loaded_light_view_from_light.tiff", hwFB);
-		cerr << "INFO: Loaded light vector render complete" << endl;
-	}else{
-		cerr << "ERROR: Transport matrix has not been generated yet, click DBG" << endl;
-	}
+	cout << Fl::version() << endl;
 }
 
 void Scene::Render(){
@@ -291,38 +126,6 @@ void Scene::InitializeHW(){
 	}
 
 	delete texs;
-
-	//OpenGL Spotlight
-	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-	
-	//Vector3D LVD = (currObjectHandle->GetCenter() - light->lppc->C).normalize();
-	//GLfloat spot_direction[] = { LVD.coords[0], LVD.coords[1], LVD.coords[2] };
-	
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	
-	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 0.8);
-	
-
-	//GLfloat mat_specular[] = {0.0, 0.0, 0.0, 1.0};
-	//GLfloat mat_shininess[] = { 0.0 };
-	//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-
-	GLfloat mat_ambient[] = { 0.00, 0.00, 0.00, 1.0 };
-	GLfloat mat_diffuse[] = { 0.0, 0.0, 0.0, 1.0 };
-	//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
-	//glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, mat_ambient);
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_LIGHT0);
-	glShadeModel(GL_SMOOTH);
 }
 
 void Scene::InitializeHWObjects(){
@@ -355,8 +158,6 @@ void Scene::InitializeHWObjects(){
 	currObjectHandle = currObject;
 	//reflectiveObjectHandle = currObject;
 
-	light = new Light(128, 128, 179.5f, Vector3D(-200.0f, 0.0f, -100.0f), center, ppc);
-	ppc->PositionAndOrient(Vector3D(200.0f, 0.0f, -100.0f), (center - Vector3D(200.0f, 0.0f, -100.0f)).normalize(), Vector3D(0.0f, 1.0f, 0.0f), ppc->Getf(), *ppc);  //Look at the object
 }
 
 void Scene::RenderHW(){
@@ -369,7 +170,7 @@ void Scene::RenderHW(){
 	}
 	
 	//Frame Setup
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Set View
@@ -378,91 +179,11 @@ void Scene::RenderHW(){
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
 
-	GLfloat light_position[] = { light->lppc->C.coords[0], light->lppc->C.coords[1], light->lppc->C.coords[2], 1.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-	GLfloat spot_direction[] = { light->currLightDirection.coords[0], light->currLightDirection.coords[1], light->currLightDirection.coords[2] };
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-
 	for(list<TMesh>::iterator i = TMList.begin(); i != TMList.end(); ++i){
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		i->RenderHW();
 	}
-}
-
-void Scene::RenderDIHW(){
-	//OpenGL Setup
-	if(!initializedHW){
-		//env = 0;
-		env = new Envmap();
-		env->texID = 500;
-		env->LoadHW();
-
-		InitializeHW();
-		initializedHW = true;
-	}
-
-	if(!initializedGPU){
-		cgi->PerSessionInit();
-		soi->PerSessionInit(cgi);
-		bemsi->PerSessionInit(cgi);
-		dbsi->PerSessionInit(cgi);
-		initializedGPU = true;
-	}
-	
-	//Frame Setup
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Vector3D center = diffuseObjectHandle->GetCenter();
-
-	if(!DI->cameraSet){
-		//DI->camera->copy(ppc);
-		DI->camera = new PPC(150.0f, ppc->w, ppc->h);
-		DI->camera->zFar = 100.0f;
-		DI->camera->zNear = 1.0f;
-		/*DI->camera->Translate('f', 170);
-		DI->camera->Translate('r', 40);
-		DI->camera->Pan(90.0f);*/
-
-		Vector3D center1 = Vector3D(0.0f,0.0f,-170.0f);
-		Vector3D center2 = Vector3D(20.0f,0.0f,-150.0f);
-
-		DI->camera->PositionAndOrient(center1 - (center2 - center1).normalize() * 15, (center2 - center1).normalize(), Vector3D(0.0f, 1.0f, 0.0f), DI->camera->Getf(), *(DI->camera));
-		
-		DI->camera->setNearAndFarPoints();
-
-		TMesh * obj = new TMesh();
-		obj->drawCameraFrustum(DI->camera);
-		obj->wireframe = true;
-		//obj->enabled = false;
-		//TMList.push_back(*obj);
-
-		for(int i = 0; i < 8; i++){
-			cout << i << ":\t" << DI->camera->frustum[i] << endl;
-		}
-
-		DI->cameraSet = true;
-	}
-	
-	//Set View
-	//Set Intrinsics
-	DI->camera->SetIntrinsicsHW();
-	//Set Extrinsics
-	DI->camera->SetExtrinsicsHW();
-
-	dbsi->PerFrameInit();
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	dbsi->BindPrograms();
-	cgi->EnableProfiles();
-	diffuseObjectHandle->RenderHW();
-	cgi->DisableProfiles();
-	dbsi->PerFrameDisable();
-	
 }
 
 void Scene::RenderGPU(){
@@ -485,7 +206,7 @@ void Scene::RenderGPU(){
 	}
 
 	//Frame Setup
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -494,10 +215,6 @@ void Scene::RenderGPU(){
 	ppc->SetIntrinsicsHW();
 	//Set Extrinsics
 	ppc->SetExtrinsicsHW();
-
-	
-
-	
 
 	soi->PerFrameInit();
 
@@ -808,8 +525,7 @@ void Scene::RefGoToView(PPC *nppc){
 }
 
 void Scene::DBG(){
-	cout << "Capturing Light Transport Matrix" << endl;
-	captureLightTransportMatrix();
+	
 }
 
 void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){

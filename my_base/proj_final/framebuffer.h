@@ -15,12 +15,6 @@ public:
 		int w, h;
 		bool isHW;
 		bool isRef;
-		bool isDI;
-
-		bool isLightTransport;
-		bool generateLightTransport;
-		bool generateCameraImage;
-		bool generateLightImage;
 
 		bool mouseCameraControl;
 		bool keyboardCameraControl;

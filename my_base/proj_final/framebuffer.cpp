@@ -18,16 +18,11 @@ FrameBuffer::FrameBuffer(int u0, int v0, int _w, int _h) : Fl_Gl_Window(u0, v0, 
 	zb = new float[w*h];
 	Set(0xFFFFFFFF);
 	isHW = false;
-	isDI = false;
 	isRef = false;
 
-	isLightTransport = false;
-	generateLightTransport = false;
-	generateCameraImage = false;
-	generateLightImage = false;
 
-	mouseCameraControl = false;
-	keyboardCameraControl = false;
+	mouseCameraControl = true;
+	keyboardCameraControl = true;
 }
 
 FrameBuffer::~FrameBuffer(){
@@ -41,92 +36,12 @@ void FrameBuffer::SetZB(float z0){
 }
 
 void FrameBuffer::draw(){
-	if(isHW && !isRef && !isDI && !isLightTransport){
+	if(isHW && !isRef){
 		scene->RenderHW(); //fixed pipeline
 		//scene->RenderGPU(); //programmable pipeline
-		//glFlush();
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, scene->fboId);
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-		glFlush();
-		glFinish();
-	}else if(isRef && isHW && !isDI){
+	}else if(isRef && isHW){
 		//nothing
-	}else if(isDI && !isLightTransport){
-		scene->RenderDIHW(); //Rendering only the diffuse object of the depth image
-		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, scene->DI->rgb);
-		glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT, GL_FLOAT, scene->DI->depths);
-		scene->DI->renderImage();
-		scene->RenderGPU(); //Done with depth image, render the whole scene now
-		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-		//isDI = false; //Never render depth image again
-	}else if(isLightTransport){
-		//nothing for now, will use transport matrix and light vector to derive camera vector (rendered image) instead of calling a regular render function
-		int currLight = 0;
-		
-		if(generateLightTransport){
-			for(int v = 0; v < scene->light->h; v++){
-				for(int u = 0; u < scene->light->w; u++){
-					scene->light->currLightDirection = (scene->light->lppc->c + scene->light->lppc->a * u + scene->light->lppc->a * 0.5f + scene->light->lppc->b * v + scene->light->lppc->b * 0.5f).normalize();  //Light direction relative to lppc "eye"
-			
-					scene->RenderHW();
-					glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-					glFinish();
-
-					scene->light->insertColumnIntoLightTransportMatrix(currLight, scene->hwFB);
-
-			
-					if(u == 0){
-						cerr << "INFO: Current light row: " << v << " / " << scene->light->h - 1 << endl;
-						//cerr << "currLightDirection: " << scene->light->currLightDirection << endl;
-					}
-
-					currLight++;
-				}
-			}
-
-			cerr << "INFO: Generating subsambled matrix visualizations" << endl;
-			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/OUTPUT_light_transport_subsampled_matrix.tiff");
-			scene->light->transposeLightTransportMatrix();
-			scene->light->saveSubsampledLightTransportMatrixAsImage("light_transport/OUTPUT_light_transport_transpose_subsampled_matrix.tiff");
-			scene->light->transposeLightTransportMatrix();
-
-			generateLightTransport = false;
-			scene->light->lightTransportMatrixCreated = true;
-
-			cerr << "INFO: Begin generation of view from camera" << endl;
-			scene->light->applyLightTransportMatrixToLightVector(this);
-			//glFinish();
-			scene->writeTIFF("light_transport/OUTPUT_initial_view_from_camera.tiff", this);
-			glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-
-			cerr << "INFO: Begin generation of view from light" << endl;
-			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
-			//glFinish();
-			scene->writeTIFF("light_transport/OUTPUT_initial_view_from_light.tiff", this);
-			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-
-			generateCameraImage = false;
-			generateLightImage = false;
-			cerr << "INFO: Initial light render complete" << endl;
-		}
-
-		if(generateCameraImage){
-			cerr << "INFO: Begin generation of view from camera" << endl;
-			scene->light->applyLightTransportMatrixToLightVector(this);
-			//glFinish();
-			//scene->writeTIFF("light_transport/view_from_camera.tiff", this);
-			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-			//generateCameraImage = false;
-		}else if(generateLightImage){
-			cerr << "INFO: Begin generation of view from light" << endl;
-			scene->light->applyTransposeLightTransportMatrixToCameraVector(this);
-			//glFinish();
-			//scene->writeTIFF("light_transport/view_from_light.tiff", this);
-			//glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
-			//generateLightImage = false;
-		}
-		
 	}else{
 		glDrawPixels(w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}
@@ -300,7 +215,7 @@ void FrameBuffer::MouseDragHandle(){
 		int mouse_dy = Fl::event_y() - mouseY;
 		mouseX = Fl::event_x();
 		mouseY = Fl::event_y();
-		//cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
+		cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
 		if(mouse_dx != 0){
 			scene->ppc->Pan(rs*mouse_dx);
 		}

@@ -2,7 +2,7 @@
 version 1.0110 
 header_name {.h} 
 code_name {.cxx}
-class GUI {open selected
+class GUI {open
 } {
   decl {\#include "scene.h"} {}
   decl {\#include <string>} {}
@@ -10,18 +10,18 @@ class GUI {open selected
   Function {GUI()} {open
   } {
     Fl_Window uiw {
-      label GUI open
-      xywh {860 213 824 608} type Double align 0 visible
+      label GUI open selected
+      xywh {860 213 824 513} type Double align 0 visible
     } {
       Fl_Button {} {
         label DBG
         callback {DBG_cb()}
-        xywh {5 565 95 40} selection_color 72
+        xywh {5 455 95 40} selection_color 72
       }
       Fl_Button {} {
         label Quit
         callback {quit_cb()}
-        xywh {105 565 95 40}
+        xywh {105 455 95 40}
       }
       Fl_Button {} {
         label {Pan Left}
@@ -312,30 +312,6 @@ class GUI {open selected
         label {Ref Scale Factor}
         xywh {515 205 100 45} labelsize 12
       }
-      Fl_Button {} {
-        label {Light: All On}
-        callback {lightAllOn_cb()}
-        xywh {5 455 95 45}
-      }
-      Fl_Button {} {
-        label {Light: Checker}
-        callback {lightChecker_cb()}
-        xywh {205 455 95 45}
-      }
-      Fl_Button {} {
-        label {Light: All Off}
-        callback {lightAllOff_cb()}
-        xywh {105 455 95 45}
-      }
-      Fl_Input loadLightVector {
-        label {Load Light Vector}
-        xywh {120 505 180 45}
-      }
-      Fl_Button {} {
-        label Load
-        callback {loadLightVector_cb()}
-        xywh {305 505 45 45}
-      }
     }
   }
   Function {} {open
@@ -620,21 +596,5 @@ class GUI {open selected
   Function {refLoadCam2_cb()} {open
   } {
     code {scene->RefLoadView1();} {}
-  }
-  Function {lightAllOn_cb()} {open
-  } {
-    code {scene->setLightTransportLightAllOn();} {}
-  }
-  Function {lightAllOff_cb()} {open
-  } {
-    code {scene->setLightTransportLightAllOff();} {}
-  }
-  Function {lightChecker_cb()} {open
-  } {
-    code {scene->setLightTransportLightChecker();} {}
-  }
-  Function {loadLightVector_cb()} {open
-  } {
-    code {scene->lightTransportLoadLightVector(loadLightVector->value());} {}
   }
 } 
