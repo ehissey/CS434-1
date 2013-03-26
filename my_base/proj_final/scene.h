@@ -42,6 +42,7 @@ public:
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;
+	int currSnapshot;
 
 	Scene();
 	void DBG();

@@ -22,6 +22,7 @@ Scene::Scene(){
 	wireframe = false;
 	initializedHW = false;
 	initializedGPU = false;
+	currSnapshot = 0;
 
 	int u0 = 20;
 	int v0 = 50;
@@ -543,8 +544,16 @@ void Scene::RefGoToView(PPC *nppc){
 
 void Scene::DBG(){
 	//ps->GenerateResult();
+	if(psReal->enabled){
+		writeCurrFrame(currSnapshot, psReal->result);
+	}else if(psVirtual->enabled){
+		writeCurrFrame(currSnapshot, psVirtual->result);
+	}
 
-	//return;
+	currSnapshot++;
+
+
+	return;
 
 	ofstream ofs("photostereo/light_pos.txt");
 
