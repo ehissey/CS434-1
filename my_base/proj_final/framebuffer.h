@@ -16,6 +16,7 @@ public:
 		bool isHW;
 		bool isRef;
 
+		bool mouseLightControl;
 		bool mouseCameraControl;
 		bool keyboardCameraControl;
 
@@ -47,6 +48,7 @@ public:
 		void KeyboardHandle();
 		void MouseWheelHandle();
 		void MouseDragHandle();
+		void MouseMoveHandle();
 
 		void CopyFrom(FrameBuffer *fb);
 

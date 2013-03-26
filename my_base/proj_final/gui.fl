@@ -11,17 +11,17 @@ class GUI {open
   } {
     Fl_Window uiw {
       label GUI open selected
-      xywh {860 213 824 513} type Double align 0 visible
+      xywh {860 213 824 679} type Double align 0 visible
     } {
       Fl_Button {} {
         label DBG
         callback {DBG_cb()}
-        xywh {5 455 95 40} selection_color 72
+        xywh {5 635 95 40} selection_color 72
       }
       Fl_Button {} {
         label Quit
         callback {quit_cb()}
-        xywh {105 455 95 40}
+        xywh {105 635 95 40}
       }
       Fl_Button {} {
         label {Pan Left}
@@ -312,6 +312,31 @@ class GUI {open
         label {Ref Scale Factor}
         xywh {515 205 100 45} labelsize 12
       }
+      Fl_Button {} {
+        label Real
+        callback {real_cb()}
+        xywh {5 500 95 40} selection_color 72
+      }
+      Fl_Button {} {
+        label Virtual
+        callback {virtual_cb()}
+        xywh {105 500 95 40} selection_color 72
+      }
+      Fl_Button {} {
+        label {Effect One}
+        callback {effectOne_cb()}
+        xywh {105 545 95 40} selection_color 72
+      }
+      Fl_Button {} {
+        label {Effect Two}
+        callback {effectTwo_cb()}
+        xywh {205 545 95 40} selection_color 72
+      }
+      Fl_Button {} {
+        label {No Effect}
+        callback {noEffect_cb()}
+        xywh {5 545 95 40} selection_color 72
+      }
     }
   }
   Function {} {open
@@ -596,5 +621,25 @@ class GUI {open
   Function {refLoadCam2_cb()} {open
   } {
     code {scene->RefLoadView1();} {}
+  }
+  Function {real_cb()} {open
+  } {
+    code {scene->setPSReal();} {}
+  }
+  Function {virtual_cb()} {open
+  } {
+    code {scene->setPSVirtual();} {}
+  }
+  Function {effectOne_cb()} {open
+  } {
+    code {scene->setPSEffect(1);} {}
+  }
+  Function {effectTwo_cb()} {open
+  } {
+    code {scene->setPSEffect(2);} {}
+  }
+  Function {noEffect_cb()} {open
+  } {
+    code {scene->setPSEffect(0);} {}
   }
 } 

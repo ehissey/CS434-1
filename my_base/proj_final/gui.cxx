@@ -400,19 +400,54 @@ void GUI::cb_Ref13_i(Fl_Button*, void*) {
 void GUI::cb_Ref13(Fl_Button* o, void* v) {
   ((GUI*)(o->parent()->user_data()))->cb_Ref13_i(o,v);
 }
+
+void GUI::cb_Real_i(Fl_Button*, void*) {
+  real_cb();
+}
+void GUI::cb_Real(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Real_i(o,v);
+}
+
+void GUI::cb_Virtual_i(Fl_Button*, void*) {
+  virtual_cb();
+}
+void GUI::cb_Virtual(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Virtual_i(o,v);
+}
+
+void GUI::cb_Effect_i(Fl_Button*, void*) {
+  effectOne_cb();
+}
+void GUI::cb_Effect(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Effect_i(o,v);
+}
+
+void GUI::cb_Effect1_i(Fl_Button*, void*) {
+  effectTwo_cb();
+}
+void GUI::cb_Effect1(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_Effect1_i(o,v);
+}
+
+void GUI::cb_No_i(Fl_Button*, void*) {
+  noEffect_cb();
+}
+void GUI::cb_No(Fl_Button* o, void* v) {
+  ((GUI*)(o->parent()->user_data()))->cb_No_i(o,v);
+}
 #include "scene.h"
 #include <string>
 #include <stdlib.h>
 
 GUI::GUI() {
-  { uiw = new Fl_Double_Window(824, 513, "GUI");
+  { uiw = new Fl_Double_Window(824, 679, "GUI");
     uiw->user_data((void*)(this));
     uiw->align(FL_ALIGN_CENTER);
-    { Fl_Button* o = new Fl_Button(5, 455, 95, 40, "DBG");
+    { Fl_Button* o = new Fl_Button(5, 635, 95, 40, "DBG");
       o->selection_color((Fl_Color)FL_DARK_RED);
       o->callback((Fl_Callback*)cb_DBG);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(105, 455, 95, 40, "Quit");
+    { Fl_Button* o = new Fl_Button(105, 635, 95, 40, "Quit");
       o->callback((Fl_Callback*)cb_Quit);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(5, 55, 95, 45, "Pan Left");
@@ -607,6 +642,26 @@ GUI::GUI() {
     { refScaleFactor = new Fl_Input(515, 205, 100, 45, "Ref Scale Factor");
       refScaleFactor->labelsize(12);
     } // Fl_Input* refScaleFactor
+    { Fl_Button* o = new Fl_Button(5, 500, 95, 40, "Real");
+      o->selection_color((Fl_Color)FL_DARK_RED);
+      o->callback((Fl_Callback*)cb_Real);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(105, 500, 95, 40, "Virtual");
+      o->selection_color((Fl_Color)FL_DARK_RED);
+      o->callback((Fl_Callback*)cb_Virtual);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(105, 545, 95, 40, "Effect One");
+      o->selection_color((Fl_Color)FL_DARK_RED);
+      o->callback((Fl_Callback*)cb_Effect);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(205, 545, 95, 40, "Effect Two");
+      o->selection_color((Fl_Color)FL_DARK_RED);
+      o->callback((Fl_Callback*)cb_Effect1);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(5, 545, 95, 40, "No Effect");
+      o->selection_color((Fl_Color)FL_DARK_RED);
+      o->callback((Fl_Callback*)cb_No);
+    } // Fl_Button* o
     uiw->end();
   } // Fl_Double_Window* uiw
 }
@@ -893,4 +948,24 @@ void GUI::refSaveCam2_cb() {
 
 void GUI::refLoadCam2_cb() {
   scene->RefLoadView1();
+}
+
+void GUI::real_cb() {
+  scene->setPSReal();
+}
+
+void GUI::virtual_cb() {
+  scene->setPSVirtual();
+}
+
+void GUI::effectOne_cb() {
+  scene->setPSEffect(1);
+}
+
+void GUI::effectTwo_cb() {
+  scene->setPSEffect(2);
+}
+
+void GUI::noEffect_cb() {
+  scene->setPSEffect(0);
 }

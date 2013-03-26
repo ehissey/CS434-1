@@ -135,6 +135,18 @@ private:
   static void cb_Ref13(Fl_Button*, void*);
 public:
   Fl_Input *refScaleFactor;
+private:
+  void cb_Real_i(Fl_Button*, void*);
+  static void cb_Real(Fl_Button*, void*);
+  void cb_Virtual_i(Fl_Button*, void*);
+  static void cb_Virtual(Fl_Button*, void*);
+  void cb_Effect_i(Fl_Button*, void*);
+  static void cb_Effect(Fl_Button*, void*);
+  void cb_Effect1_i(Fl_Button*, void*);
+  static void cb_Effect1(Fl_Button*, void*);
+  void cb_No_i(Fl_Button*, void*);
+  static void cb_No(Fl_Button*, void*);
+public:
   void show();
   void DBG_cb();
   void quit_cb();
@@ -193,5 +205,10 @@ public:
   void refLoadCam1_cb();
   void refSaveCam2_cb();
   void refLoadCam2_cb();
+  void real_cb();
+  void virtual_cb();
+  void effectOne_cb();
+  void effectTwo_cb();
+  void noEffect_cb();
 };
 #endif

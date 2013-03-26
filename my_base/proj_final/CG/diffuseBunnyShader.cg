@@ -35,18 +35,29 @@ TRIANGLE void GeometryMain(AttribArray<VertexDataOutput> tverts, uniform float4x
 	return;
 }
 
-PixelDataOutput FragmentMain(VertexDataOutput pdi) {
+PixelDataOutput FragmentMain(
+	VertexDataOutput pdi,
+	uniform float3 lightDir) {
 
 	PixelDataOutput ret;
 
 	//ret.color = pdi.color;
 	
-	float4 diffuseColor = float4(0.0f, 0.2f, 0.0f, 1.0f);
-	float3 upDir = float3(0.0f, 1.0f, 0.0f);
+	
+	/*
+	float4 diffuseColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float3 dir = float3(1.0f, 1.0f, 0.0f);
 
-	float dotResult = dot(upDir, normalize(pdi.normal));
+	float dotResult = dot(normalize(dir), normalize(pow(pdi.normal, 1)));
 
-	ret.color = diffuseColor + float4(0.0f, 0.6f, 0.0f, 0.0f) * dotResult;
+	ret.color = diffuseColor + float4(1.0f, 1.0f, 1.0f, 0.0f) * dotResult;*/
+
+	/*float3 toLight = lightDir - pdi.vertex;
+
+	ret.color = float4(float3(1.0f, 1.0f, 1.0f) * dot(normalize(toLight), normalize(pow(pdi.normal, 1.0f))), 1.0f);*/
+
+	//ret.color = float4(float3(1.0f, 1.0f, 1.0f) * dot(normalize(lightDir), normalize(pow(pdi.normal, 1.0f))), 1.0f);
+	ret.color = float4(pdi.color.xyz * dot(normalize(lightDir), normalize(pow(pdi.normal, 1.0f))), 1.0f);
 
 	return ret;
 }

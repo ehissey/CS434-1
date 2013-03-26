@@ -9,6 +9,7 @@
 #include "pointlight.h"
 #include "envmap.h"
 #include "CGInterface.h"
+#include "photostereo.h"
 
 #include <string>
 #include <list>
@@ -21,6 +22,7 @@ public:
 	ShaderOneInterface *soi;
 	BgEnvMapShaderInterface *bemsi;
 	diffuseBunnyShaderInterface *dbsi;
+	Vector3D lightDir;
 
 	GUI *gui;
 	PPC *ppc, *refPPC;
@@ -35,6 +37,8 @@ public:
 	FrameBuffer *fb, *refFB, *hwFB;
 	PointLight *pl;
 	Envmap *env;
+	Photostereo *psReal;
+	Photostereo *psVirtual;
 	bool wireframe;
 	bool initializedHW;
 	bool initializedGPU;
@@ -85,6 +89,10 @@ public:
 	void RefSaveView1();
 	void RefLoadView1();
 	void RefGoToView(PPC *nppc);
+
+	void setPSReal();
+	void setPSVirtual();
+	void setPSEffect(int e);
 };
 
 extern Scene *scene;

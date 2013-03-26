@@ -240,6 +240,8 @@ bool diffuseBunnyShaderInterface::PerSessionInit(CGInterface *cgi){
 		geometryModelViewProj = cgGetNamedParameter(geometryProgram, "modelViewProj");
 	#endif
 
+	pixelLightDir = cgGetNamedParameter(pixelProgram, "lightDir" );
+
 	return true;
 }
 
@@ -250,6 +252,7 @@ void diffuseBunnyShaderInterface::PerFrameInit(){
 		cgGLSetStateMatrixParameter(geometryModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	#endif
 
+	cgGLSetParameter3fv(pixelLightDir, (float*)&(scene->lightDir));
 }
 
 void diffuseBunnyShaderInterface::PerFrameDisable(){

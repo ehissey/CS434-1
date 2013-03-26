@@ -60,6 +60,7 @@ class diffuseBunnyShaderInterface{
 
 	CGparameter vertexModelViewProj;
 	CGparameter geometryModelViewProj;
+	CGparameter pixelLightDir;
 
 public:
 	diffuseBunnyShaderInterface() {};

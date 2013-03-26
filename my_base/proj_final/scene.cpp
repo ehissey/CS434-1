@@ -7,8 +7,7 @@
 #include "ppc.h"
 #include "Vector3D.h"
 #include "aabb.h"
-
-
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -50,6 +49,8 @@ Scene::Scene(){
 	float hfov = 45.0f;
 	ppc = new PPC(hfov, w, h);
 	
+	psReal = 0;
+	psVirtual = 0;
 	InitializeHWObjects();
 
 	hwFB->show();
@@ -59,7 +60,7 @@ Scene::Scene(){
 
 	Render();
 
-	cout << Fl::version() << endl;
+	//cout << Fl::version() << endl;
 }
 
 void Scene::Render(){
@@ -69,6 +70,18 @@ void Scene::Render(){
 
 	if(hwFB){
 		hwFB->redraw();
+	}
+
+	if(psReal){
+		if(psReal->generated && psReal->enabled){
+			psReal->UpdateResult();
+		}
+	}
+
+	if(psVirtual){
+		if(psVirtual->generated && psVirtual->enabled){
+			psVirtual->UpdateResult();
+		}
 	}
 	return;
 }
@@ -129,23 +142,23 @@ void Scene::InitializeHW(){
 }
 
 void Scene::InitializeHWObjects(){
-	Vector3D center = Vector3D(0.0f,0.0f,-500.0f);
+	Vector3D center = Vector3D(0.0f,0.0f,-200.0f);
 	float sl = 256.0;
 
 	currObject = new TMesh();
-	currObject->Load("geometry/teapot57k.bin");
+	currObject->Load("geometry/bunny.bin");
 
 	AABB aabb = currObject->GetAABB();
 	float size0 = (aabb.corners[1]-aabb.corners[0]).length();
 	Vector3D tcenter = currObject->GetCenter();
 	currObject->Translate(tcenter*-1.0f+center);
-	float size1 = 700.0f;
+	float size1 = 180.0f;
 	currObject->ScaleAboutCenter(size1/size0);
 	currObject->kamb = 0.20f;
 	currObject->gouraud = false;
 	currObject->phong = false;
 	currObject->phongExp = 40.0f;
-	currObject->enableShader = false;
+	currObject->enableShader = true;
 	currObject->shaderSelection = 2;
 	currObject->sphereMorphRaidus = 20.0f;
 	currObject->sphereMorphScaleFactor = 0.0f;
@@ -158,6 +171,10 @@ void Scene::InitializeHWObjects(){
 	currObjectHandle = currObject;
 	//reflectiveObjectHandle = currObject;
 
+	lightDir = Vector3D(-1.0f, 0.0f, 0.0f);
+
+	psReal = new Photostereo(true);
+	psVirtual = new Photostereo(false);
 }
 
 void Scene::RenderHW(){
@@ -206,7 +223,7 @@ void Scene::RenderGPU(){
 	}
 
 	//Frame Setup
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -525,7 +542,64 @@ void Scene::RefGoToView(PPC *nppc){
 }
 
 void Scene::DBG(){
+	//ps->GenerateResult();
+
+	//return;
+
+	ofstream ofs("photostereo/light_pos.txt");
+
+	lightDir = Vector3D(-1.0f, 0.0f, 1.0f);
+	Render();
+	Fl::check();
+	//writeCurrFrame(0, hwFB);
+	writeTIFF("photostereo/testA-0v.tiff", hwFB);
+	ofs << lightDir << endl;
+
+	lightDir = Vector3D(1.0f, 0.0f, 1.0f);
+	Render();
+	Fl::check();
+	//writeCurrFrame(1, hwFB);
+	writeTIFF("photostereo/testA-1v.tiff", hwFB);
+	ofs << lightDir << endl;
+
+	lightDir = Vector3D(0.0f, 1.0f, 1.0f);
+	Render();
+	Fl::check();
+	//writeCurrFrame(2, hwFB);
+	writeTIFF("photostereo/testA-2v.tiff", hwFB);
+	ofs << lightDir << endl;
 	
+	lightDir = Vector3D(-1.0f, 1.0f, 0.0f);
+	Render();
+	Fl::check();
+	//writeCurrFrame(3, hwFB);
+	writeTIFF("photostereo/testA-3v.tiff", hwFB);
+	ofs << lightDir << endl;
+
+	lightDir = Vector3D(1.0f, 1.0f, 0.0f);
+	Render();
+	Fl::check();
+	//writeCurrFrame(4, hwFB);
+	writeTIFF("photostereo/testA-4v.tiff", hwFB);
+	ofs << lightDir << endl;
+
+	lightDir = Vector3D(-1.0f, 0.0f, 0.0f);
+	Render();
+	Fl::check();
+	
+	ofs.close();
+
+	/*ifstream ifs("photostereo/light_pos.txt");
+	Vector3D v0;
+	Vector3D v1;
+	Vector3D v2;
+	Vector3D v3;
+	Vector3D v4;
+	ifs >> v0 >> v1 >> v2 >> v3 >> v4;
+
+	cout << v0 << endl << v1 << endl << v2 << endl << v3 << endl << v4 << endl;
+
+	ifs.close();*/
 }
 
 void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
@@ -537,5 +611,54 @@ void Scene::writeCurrFrame(int currFrame, FrameBuffer *frame){
 	}else{
 		filename << "frames/" << currFrame << ".tiff";
 	}
-	//writeTIFF(filename.str(), frame);
+	writeTIFF(filename.str(), frame);
+}
+
+void Scene::setPSReal(){
+	if(!psReal->generated){
+		psReal->GenerateResult();
+		psReal->enabled = true;
+		psVirtual->enabled = false;
+		psVirtual->result->hide();
+	}else{
+		psReal->enabled = true;
+		psVirtual->enabled = false;
+		psReal->result->show();
+		psVirtual->result->hide();
+		psReal->UpdateResult();
+	}
+
+	hwFB->hide();
+}
+void Scene::setPSVirtual(){
+	if(!psVirtual->generated){
+		psVirtual->GenerateResult();
+		psVirtual->enabled = true;
+		psReal->enabled = false;
+		psReal->result->hide();
+	}else{
+		psVirtual->enabled = true;
+		psReal->enabled = false;
+		psVirtual->result->show();
+		psReal->result->hide();
+		psVirtual->UpdateResult();
+	}
+
+	hwFB->hide();
+}
+
+void Scene::setPSEffect(int e){
+	/*if(e == 2){
+		lightDir = Vector3D(-0.5f, 0.0f, 1.0f);
+		Render();
+	}else{*/
+		psReal->effect = e;
+		psVirtual->effect = e;
+
+		if(psReal->enabled){
+			psReal->UpdateResult();
+		}else if(psVirtual->enabled){
+			psVirtual->UpdateResult();
+		}
+	//}
 }

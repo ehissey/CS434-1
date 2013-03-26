@@ -21,8 +21,9 @@ FrameBuffer::FrameBuffer(int u0, int v0, int _w, int _h) : Fl_Gl_Window(u0, v0, 
 	isRef = false;
 
 
-	mouseCameraControl = true;
-	keyboardCameraControl = true;
+	mouseCameraControl = false;
+	keyboardCameraControl = false;
+	mouseLightControl = true;
 }
 
 FrameBuffer::~FrameBuffer(){
@@ -37,8 +38,8 @@ void FrameBuffer::SetZB(float z0){
 
 void FrameBuffer::draw(){
 	if(isHW && !isRef){
-		scene->RenderHW(); //fixed pipeline
-		//scene->RenderGPU(); //programmable pipeline
+		//scene->RenderHW(); //fixed pipeline
+		scene->RenderGPU(); //programmable pipeline
 		glReadPixels(0,0,w,h,GL_RGBA, GL_UNSIGNED_BYTE, pix);
 	}else if(isRef && isHW){
 		//nothing
@@ -197,6 +198,9 @@ int FrameBuffer::handle(int event){
 	case FL_DRAG:
 		MouseDragHandle();
 		return 0;
+	case FL_MOVE:
+		MouseMoveHandle();
+		return 0;
 	default:
 		break;
 	}
@@ -208,6 +212,31 @@ void DebugBreak(){
 	return;
 }
 
+void FrameBuffer::MouseMoveHandle(){
+	if(mouseLightControl){
+		mouseX = Fl::event_x();
+		mouseY = Fl::event_y();
+
+		/*float tempX = ((float)(mouseX - scene->hwFB->w/2.0f)) / ((float)(scene->hwFB->w/2.0f));
+		float tempY = -((float)(mouseY - scene->hwFB->h/2.0f)) / ((float)(scene->hwFB->h/2.0f));
+
+		cout << tempX << " " << tempY << endl;
+
+		scene->lightDir = Vector3D(tempX, tempY, 0.0f);
+		scene->Render();*/
+
+		float tempX = ((float)(mouseX - scene->hwFB->w/2.0f)) / ((float)(scene->hwFB->w/2.0f));
+		float tempY = -((float)(mouseY - scene->hwFB->h/2.0f)) / ((float)(scene->hwFB->h/2.0f));
+
+		Vector3D baseDir = Vector3D(0.0f, 0.0f, 1.0f);
+		scene->lightDir = baseDir.rotate(Vector3D(0.0f, 1.0f, 0.0f), 90.0f*tempX);
+		scene->lightDir = scene->lightDir.rotate(Vector3D(1.0f, 0.0f, 0.0f), 90.0f*-tempY);
+
+		//cout << tempX << " " << tempY << endl;
+		scene->Render();
+	}
+}
+
 void FrameBuffer::MouseDragHandle(){
 	if(mouseCameraControl){
 		float rs = 0.1f;
@@ -215,7 +244,7 @@ void FrameBuffer::MouseDragHandle(){
 		int mouse_dy = Fl::event_y() - mouseY;
 		mouseX = Fl::event_x();
 		mouseY = Fl::event_y();
-		cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
+		//cout << "dx: " << mouse_dx << "\tdy: " << mouse_dy << endl;
 		if(mouse_dx != 0){
 			scene->ppc->Pan(rs*mouse_dx);
 		}
